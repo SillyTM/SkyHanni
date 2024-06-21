@@ -46,7 +46,9 @@ import at.hannibal2.skyhanni.features.gui.customscoreboard.CustomScoreboardUtils
 import at.hannibal2.skyhanni.features.gui.customscoreboard.CustomScoreboardUtils.getSoulflow
 import at.hannibal2.skyhanni.test.command.ErrorManager
 import at.hannibal2.skyhanni.utils.CollectionUtils.addNotNull
+import at.hannibal2.skyhanni.utils.CollectionUtils.editCopy
 import at.hannibal2.skyhanni.utils.CollectionUtils.nextAfter
+import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzUtils.inAdvancedMiningIsland
 import at.hannibal2.skyhanni.utils.LorenzUtils.inAnyIsland
 import at.hannibal2.skyhanni.utils.NumberUtil.addSeparators
@@ -64,16 +66,16 @@ import java.util.function.Supplier
 import kotlin.time.Duration.Companion.seconds
 import at.hannibal2.skyhanni.features.gui.customscoreboard.ScoreboardPattern as SbPattern
 
-var confirmedUnknownLines = mutableListOf<String>()
-var unconfirmedUnknownLines = listOf<String>()
-var unknownLinesSet = TimeLimitedSet<String>(2.seconds) { onRemoval(it) }
 const val HIDDEN = "<hidden>"
 const val EMPTY = "<empty>"
+internal var confirmedUnknownLines = listOf<String>()
+internal var unconfirmedUnknownLines = listOf<String>()
+internal var unknownLinesSet = TimeLimitedSet<String>(1.seconds) { onRemoval(it) }
 
 private fun onRemoval(line: String) {
-    if (!unconfirmedUnknownLines.contains(line)) return
+    if (line !in unconfirmedUnknownLines) return
     unconfirmedUnknownLines = unconfirmedUnknownLines.filterNot { it == line }
-    confirmedUnknownLines.add(line)
+    confirmedUnknownLines = confirmedUnknownLines.editCopy { add(line) }
     if (!config.unknownLinesWarning) return
     val pluralize = pluralize(confirmedUnknownLines.size, "unknown line", withNumber = true)
     val message = "CustomScoreboard detected $pluralize"
@@ -81,7 +83,7 @@ private fun onRemoval(line: String) {
         CustomScoreboardUtils.UndetectedScoreboardLines(message),
         message,
         "Unknown Lines" to confirmedUnknownLines,
-        "Island" to HypixelData.skyBlockIsland,
+        "Island" to LorenzUtils.skyBlockIsland,
         "Area" to HypixelData.skyBlockArea,
         "Full Scoreboard" to ScoreboardData.sidebarLinesFormatted,
         noStackTrace = true,
@@ -529,7 +531,8 @@ private fun getSoulflowDisplayWhen() = !inAnyIsland(IslandType.THE_RIFT)
 
 private fun getEmptyLineDisplayPair() = listOf(EMPTY)
 
-private fun getIslandDisplayPair() = listOf("§7㋖ §a" + HypixelData.skyBlockIsland.displayName)
+private fun getIslandDisplayPair() =
+    listOf("§7㋖ §a" + LorenzUtils.skyBlockIsland.displayName to HorizontalAlignment.LEFT)
 
 private fun getLocationDisplayPair() = buildList {
     addNotNull(HypixelData.skyBlockAreaWithSymbol)
