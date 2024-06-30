@@ -1,25 +1,42 @@
-//
-// TODO LIST
-// V2 RELEASE
-//  - Bank API (actually maybe not, I like the current design)
-//  - countdown events like fishing festival + fiesta when its not on tablist
-//  - improve hide coin difference to also work with bits, motes, etc
-//  - color options in the purse etc lines
-//  - choose the amount of decimal places in shorten nums
-//
+/**
+ * TODO LIST
+ *  - Bank API (actually maybe not, I like the current design)
+ *  - countdown events like fishing festival + fiesta when its not on tablist
+ *  - improve hide coin difference to also work with bits, motes, etc
+ *  - color options in the purse etc lines
+ *  - choose the amount of decimal places in shorten nums
+ *  - heavily optimize elements and events by only updating them when absolutely needed
+ */
 
 package at.hannibal2.skyhanni.features.gui.customscoreboard
 
 import at.hannibal2.skyhanni.SkyHanniMod
 import at.hannibal2.skyhanni.config.ConfigUpdaterMigrator
 import at.hannibal2.skyhanni.config.enums.OutsideSbFeature
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.AlignmentConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.ArrowConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.BackgroundConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.ChunkedStatsConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.CustomScoreboardConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.DisplayConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.EventsConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.InformationFilteringConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.MaxwellConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.MayorConfig
+import at.hannibal2.skyhanni.config.features.gui.customscoreboard.PartyConfig
 import at.hannibal2.skyhanni.data.ScoreboardData
 import at.hannibal2.skyhanni.events.ConfigLoadEvent
 import at.hannibal2.skyhanni.events.DebugDataCollectEvent
 import at.hannibal2.skyhanni.events.GuiPositionMovedEvent
 import at.hannibal2.skyhanni.events.GuiRenderEvent
+import at.hannibal2.skyhanni.events.IslandChangeEvent
 import at.hannibal2.skyhanni.events.LorenzTickEvent
 import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
+import at.hannibal2.skyhanni.features.gui.customscoreboard.ScoreboardLine.Companion.align
+import at.hannibal2.skyhanni.features.gui.customscoreboard.elements.Footer
+import at.hannibal2.skyhanni.features.gui.customscoreboard.elements.ScoreboardElement
+import at.hannibal2.skyhanni.features.gui.customscoreboard.elements.Title
+import at.hannibal2.skyhanni.features.gui.customscoreboard.events.ScoreboardEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.ChatUtils
 import at.hannibal2.skyhanni.utils.ConditionalUtils
@@ -38,30 +55,29 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.seconds
 
-typealias ScoreboardElementType = Pair<String, HorizontalAlignment>
-
 @SkyHanniModule
 object CustomScoreboard {
 
-    private var display = emptyList<ScoreboardElementType>()
-    private var cache = emptyList<ScoreboardElementType>()
-    private val guiName = "Custom Scoreboard"
+    private var display = listOf<ScoreboardLine>()
+    private var cache = listOf<ScoreboardLine>()
+
+    private var currentIslandEntries = listOf<ScoreboardElement>()
+    var currentIslandEvents = listOf<ScoreboardEvent>()
+        private set
+
+    private const val GUI_NAME = "Custom Scoreboard"
 
     @SubscribeEvent
     fun onRenderOverlay(event: GuiRenderEvent.GuiOverlayRenderEvent) {
         if (!isEnabled()) return
         if (display.isEmpty()) return
 
-        val render =
-            if (!TabListData.fullyLoaded && displayConfig.cacheScoreboardOnIslandSwitch && cache.isNotEmpty()) {
-                cache
-            } else {
-                display
-            }
+        val render = if (!TabListData.fullyLoaded && displayConfig.cacheScoreboardOnIslandSwitch && cache.isNotEmpty()) cache
+        else display
 
         val textRenderable = Renderable.verticalContainer(
-            render.map { Renderable.string(it.first, horizontalAlign = it.second) },
-            0,
+            render.map { Renderable.string(it.display, horizontalAlign = it.alignment) },
+            displayConfig.lineSpacing - 10,
             horizontalAlign = HorizontalAlignment.CENTER,
             verticalAlign = VerticalAlignment.CENTER,
         )
@@ -70,15 +86,15 @@ object CustomScoreboard {
 
         RenderBackground.updatePosition(finalRenderable)
 
-        config.position.renderRenderable(finalRenderable, posLabel = guiName)
+        config.position.renderRenderable(finalRenderable, posLabel = GUI_NAME)
     }
 
     @SubscribeEvent
     fun onGuiPositionMoved(event: GuiPositionMovedEvent) {
-        if (event.guiName == guiName) {
+        if (event.guiName == GUI_NAME) {
             with(alignmentConfig) {
-                if (horizontalAlignment != HorizontalAlignment.DONT_ALIGN
-                    || verticalAlignment != VerticalAlignment.DONT_ALIGN
+                if (horizontalAlignment != HorizontalAlignment.DONT_ALIGN ||
+                    verticalAlignment != VerticalAlignment.DONT_ALIGN
                 ) {
                     horizontalAlignment = HorizontalAlignment.DONT_ALIGN
                     verticalAlignment = VerticalAlignment.DONT_ALIGN
@@ -104,17 +120,17 @@ object CustomScoreboard {
         if (LorenzUtils.inSkyBlock && displayConfig.useCustomLines) UnknownLinesHandler.handleUnknownLines()
     }
 
-    internal val config get() = SkyHanniMod.feature.gui.customScoreboard
-    internal val displayConfig get() = config.display
-    internal val alignmentConfig get() = displayConfig.alignment
-    internal val arrowConfig get() = displayConfig.arrow
-    internal val chunkedConfig get() = displayConfig.chunkedStats
-    internal val eventsConfig get() = displayConfig.events
-    internal val mayorConfig get() = displayConfig.mayor
-    internal val partyConfig get() = displayConfig.party
-    internal val maxwellConfig get() = displayConfig.maxwell
-    internal val informationFilteringConfig get() = config.informationFiltering
-    internal val backgroundConfig get() = config.background
+    val config: CustomScoreboardConfig get() = SkyHanniMod.feature.gui.customScoreboard
+    val displayConfig: DisplayConfig get() = config.display
+    val alignmentConfig: AlignmentConfig get() = displayConfig.alignment
+    val arrowConfig: ArrowConfig get() = displayConfig.arrow
+    val chunkedConfig: ChunkedStatsConfig get() = displayConfig.chunkedStats
+    val eventsConfig: EventsConfig get() = displayConfig.events
+    val mayorConfig: MayorConfig get() = displayConfig.mayor
+    val partyConfig: PartyConfig get() = displayConfig.party
+    val maxwellConfig: MaxwellConfig get() = displayConfig.maxwell
+    val informationFilteringConfig: InformationFilteringConfig get() = config.informationFiltering
+    val backgroundConfig: BackgroundConfig get() = config.background
 
     private fun createLines() = when {
         !LorenzUtils.inSkyBlock -> addAllNonSkyBlockLines()
@@ -123,34 +139,26 @@ object CustomScoreboard {
     }
 
     private fun addAllNonSkyBlockLines() = buildList {
-        addAll(ScoreboardElement.TITLE.getVisiblePair())
-        addAll(ScoreboardData.sidebarLinesFormatted.dropLast(1).map { it to HorizontalAlignment.LEFT })
-        addAll(ScoreboardElement.FOOTER.getVisiblePair())
+        addAll(Title.getLines())
+        addAll(ScoreboardData.sidebarLinesFormatted.dropLast(1).map { it.align() })
+        addAll(Footer.getLines())
     }
 
     private fun addDefaultSkyBlockLines() = buildList {
-        add(ScoreboardData.objectiveTitle to displayConfig.titleAndFooter.alignTitleAndFooter)
-        addAll(ScoreboardData.sidebarLinesFormatted.map { it to HorizontalAlignment.LEFT })
+        add(ScoreboardData.objectiveTitle align displayConfig.titleAndFooter.alignTitleAndFooter)
+        addAll(ScoreboardData.sidebarLinesFormatted.map { it.align() })
     }
 
-    private fun addCustomSkyBlockLines() = buildList<ScoreboardElementType> {
-        for (element in config.scoreboardEntries) {
-            val lines = element.getVisiblePair()
+    private fun addCustomSkyBlockLines() = buildList<ScoreboardLine> {
+        for (element in currentIslandEntries) {
+            val lines = element.getLines()
             if (lines.isEmpty()) continue
 
             if (
                 informationFilteringConfig.hideConsecutiveEmptyLines &&
-                lines.first().first == "<empty>" && lastOrNull()?.first?.isEmpty() == true
+                lines.first().display.isEmpty() &&
+                lastOrNull()?.display?.isEmpty() == true
             ) {
-                continue
-            }
-
-            if (lines.first().first == "<empty>") {
-                add("" to HorizontalAlignment.LEFT)
-                continue
-            }
-
-            if (lines.any { it.first == "<hidden>" }) {
                 continue
             }
 
@@ -158,18 +166,14 @@ object CustomScoreboard {
         }
     }
 
-    private fun List<ScoreboardElementType>.removeEmptyLinesFromEdges(): List<ScoreboardElementType> {
-        if (config.informationFiltering.hideEmptyLinesAtTopAndBottom) {
-            return this
-                .dropWhile { it.first.isEmpty() }
-                .dropLastWhile { it.first.isEmpty() }
-        }
-        return this
-    }
+    private fun List<ScoreboardLine>.removeEmptyLinesFromEdges(): List<ScoreboardLine> =
+        takeIf { !informationFilteringConfig.hideEmptyLinesAtTopAndBottom }
+            ?: dropWhile { it.display.isBlank() }.dropLastWhile { it.display.isBlank() }
 
     private var dirty = false
 
-    // Thank you Apec for showing that the ElementType of the stupid scoreboard is FUCKING HELMET WTF
+    // The ElementType for the Vanilla Scoreboard is called HELMET
+    // Thanks to APEC for showing this
     @SubscribeEvent
     fun onRenderScoreboard(event: RenderGameOverlayEvent.Post) {
         if (event.type == RenderGameOverlayEvent.ElementType.HELMET) {
@@ -192,6 +196,12 @@ object CustomScoreboard {
         ) {
             if (!isHideVanillaScoreboardEnabled()) dirty = true
         }
+        ConditionalUtils.onToggle(
+            config.scoreboardEntries,
+            eventsConfig.eventEntries,
+        ) {
+            updateIslandEntries()
+        }
     }
 
     @SubscribeEvent
@@ -202,25 +212,35 @@ object CustomScoreboard {
     }
 
     @SubscribeEvent
+    fun onIslandChange(event: IslandChangeEvent) {
+        updateIslandEntries()
+    }
+
+    private fun updateIslandEntries() {
+        currentIslandEntries = config.scoreboardEntries.get().map { it.element }.filter { it.showIsland() }
+        currentIslandEvents = eventsConfig.eventEntries.get().map { it.event }.filter { it.showIsland() }
+    }
+
+    @SubscribeEvent
     fun onDebugDataCollect(event: DebugDataCollectEvent) {
         event.title("Custom Scoreboard")
         event.addIrrelevant {
             if (!config.enabled.get()) {
                 add("Custom Scoreboard disabled.")
             } else {
-                ScoreboardElement.entries.map { element ->
+                ScoreboardEntry.entries.forEach { entry ->
                     add(
-                        "${element.name.firstLetterUppercase()} - " +
-                            "${element.showWhen.invoke()} - " +
-                            "${element.getVisiblePair().map { it.first }}",
+                        "${entry.name.firstLetterUppercase()} - " +
+                            "island: ${entry.element.showIsland()} - " +
+                            "show: ${entry.element.showWhen()} - " +
+                            "${entry.element.getLines().map { it.display }}",
                     )
                 }
             }
         }
     }
 
-    private fun isEnabled() =
-        (LorenzUtils.inSkyBlock || OutsideSbFeature.CUSTOM_SCOREBOARD.isSelected()) && config.enabled.get()
+    private fun isEnabled() = (LorenzUtils.inSkyBlock || OutsideSbFeature.CUSTOM_SCOREBOARD.isSelected()) && config.enabled.get()
 
     private fun isHideVanillaScoreboardEnabled() = isEnabled() && displayConfig.hideVanillaScoreboard.get()
 
@@ -230,12 +250,7 @@ object CustomScoreboard {
         val displayConfigPrefix = "$prefix.displayConfig"
         val displayPrefix = "$prefix.display"
 
-        event.move(
-            28,
-            "$prefix.displayConfig.showAllActiveEvents",
-            "$prefix.displayConfig.eventsConfig.showAllActiveEvents",
-        )
-
+        event.move(28, "$displayConfigPrefix.showAllActiveEvents", "$displayConfigPrefix.eventsConfig.showAllActiveEvents")
         event.move(31, "$displayConfigPrefix.arrowAmountDisplay", "$displayPrefix.arrow.amountDisplay")
         event.move(31, "$displayConfigPrefix.colorArrowAmount", "$displayPrefix.arrow.colorArrowAmount")
         event.move(31, "$displayConfigPrefix.showMagicalPower", "$displayPrefix.maxwell.showMagicalPower")
@@ -247,12 +262,7 @@ object CustomScoreboard {
         event.move(31, "$displayConfigPrefix.showMaxIslandPlayers", "$displayPrefix.showMaxIslandPlayers")
         event.move(31, "$displayConfigPrefix.numberFormat", "$displayPrefix.numberFormat")
         event.move(31, "$displayConfigPrefix.lineSpacing", "$displayPrefix.lineSpacing")
-        event.move(
-            31,
-            "$displayConfigPrefix.cacheScoreboardOnIslandSwitch",
-            "$displayPrefix.cacheScoreboardOnIslandSwitch",
-        )
-        // Categories
+        event.move(31, "$displayConfigPrefix.cacheScoreboardOnIslandSwitch", "$displayPrefix.cacheScoreboardOnIslandSwitch")
         event.move(31, "$displayConfigPrefix.alignment", "$displayPrefix.alignment")
         event.move(31, "$displayConfigPrefix.titleAndFooter", "$displayPrefix.titleAndFooter")
         event.move(31, "$prefix.backgroundConfig", "$prefix.background")
@@ -263,22 +273,23 @@ object CustomScoreboard {
 
         event.transform(37, "$displayPrefix.events.eventEntries") { element ->
             val array = element.asJsonArray
-            array.add(JsonPrimitive(ScoreboardEvent.QUEUE.name))
+            array.add(JsonPrimitive(ScoreboardEventEntry.QUEUE.name))
             array
         }
         event.transform(40, "$displayPrefix.events.eventEntries") { element ->
             val jsonArray = element.asJsonArray
             val newArray = JsonArray()
+            val oldElements = listOf("HOT_DOG_CONTEST", "EFFIGIES")
 
             for (jsonElement in jsonArray) {
                 val stringValue = jsonElement.asString
-                if (stringValue !in listOf("HOT_DOG_CONTEST", "EFFIGIES")) {
+                if (stringValue !in oldElements) {
                     newArray.add(jsonElement)
                 }
             }
 
-            if (jsonArray.any { it.asString in listOf("HOT_DOG_CONTEST", "EFFIGIES") }) {
-                newArray.add(JsonPrimitive(ScoreboardEvent.RIFT.name))
+            if (jsonArray.any { it.asString in oldElements }) {
+                newArray.add(JsonPrimitive(ScoreboardEventEntry.RIFT.name))
             }
 
             newArray
@@ -304,13 +315,13 @@ object CustomScoreboard {
         }
         event.transform(50, "$displayPrefix.events.eventEntries") { element ->
             val array = element.asJsonArray
-            array.add(JsonPrimitive(ScoreboardEvent.ANNIVERSARY.name))
-            array.add(JsonPrimitive(ScoreboardEvent.CARNIVAL.name))
+            array.add(JsonPrimitive(ScoreboardEventEntry.ANNIVERSARY.name))
+            array.add(JsonPrimitive(ScoreboardEventEntry.CARNIVAL.name))
             array
         }
         event.transform(51, "$displayPrefix.events.eventEntries") { element ->
             val array = element.asJsonArray
-            array.add(JsonPrimitive(ScoreboardEvent.NEW_YEAR.name))
+            array.add(JsonPrimitive(ScoreboardEventEntry.NEW_YEAR.name))
             array
         }
         event.move(
@@ -319,6 +330,24 @@ object CustomScoreboard {
             "$displayPrefix.titleAndFooter.useCustomTitle",
         ) {
             JsonPrimitive(!it.asBoolean)
+        }
+        event.transform(53, "$displayPrefix.events.eventEntries") { element ->
+            val jsonArray = element.asJsonArray
+            val newArray = JsonArray()
+            val oldElements = listOf("GARDEN_CLEAN_UP", "GARDEN_PASTING")
+
+            for (jsonElement in jsonArray) {
+                val stringValue = jsonElement.asString
+                if (stringValue !in oldElements) {
+                    newArray.add(jsonElement)
+                }
+            }
+
+            if (jsonArray.any { it.asString in oldElements }) {
+                newArray.add(JsonPrimitive(ScoreboardEventEntry.GARDEN.name))
+            }
+
+            newArray
         }
     }
 }

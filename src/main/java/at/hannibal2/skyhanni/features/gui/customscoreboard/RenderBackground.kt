@@ -14,7 +14,7 @@ object RenderBackground {
 
     private val textureLocation by lazy { ResourceLocation("skyhanni", "scoreboard.png") }
 
-    internal fun addBackground(renderable: Renderable): Renderable {
+    fun addBackground(renderable: Renderable): Renderable {
         val backgroundConfig = CustomScoreboard.backgroundConfig
         val outlineConfig = backgroundConfig.outline
         val padding = backgroundConfig.borderSize
@@ -27,8 +27,8 @@ object RenderBackground {
                 textureLocation,
                 (backgroundConfig.customBackgroundImageOpacity * 255) / 100,
                 padding,
-                horizontalAlign = RenderUtils.HorizontalAlignment.CENTER,
-                verticalAlign = RenderUtils.VerticalAlignment.CENTER
+                RenderUtils.HorizontalAlignment.CENTER,
+                RenderUtils.VerticalAlignment.CENTER,
             )
         } else {
             Renderable.drawInsideRoundedRect(
@@ -37,8 +37,8 @@ object RenderBackground {
                 padding,
                 backgroundConfig.roundedCornerSmoothness,
                 1,
-                horizontalAlign = RenderUtils.HorizontalAlignment.CENTER,
-                verticalAlign = RenderUtils.VerticalAlignment.CENTER
+                RenderUtils.HorizontalAlignment.CENTER,
+                RenderUtils.VerticalAlignment.CENTER,
             )
         }
 
@@ -52,13 +52,13 @@ object RenderBackground {
                 outlineConfig.colorBottom.toChromaColor().rgb,
                 outlineConfig.thickness,
                 outlineConfig.blur,
-                horizontalAlign = RenderUtils.HorizontalAlignment.CENTER,
-                verticalAlign = RenderUtils.VerticalAlignment.CENTER
+                RenderUtils.HorizontalAlignment.CENTER,
+                RenderUtils.VerticalAlignment.CENTER,
             )
         } else backgroundRenderable
     }
 
-    internal fun updatePosition(renderable: Renderable) {
+    fun updatePosition(renderable: Renderable) {
         if (GuiEditManager.isInGui()) return
         val alignmentConfig = CustomScoreboard.alignmentConfig
 
