@@ -48,8 +48,7 @@ object CarnivalAPI {
     fun inCarnival() = IslandType.HUB.isInIsland() && LorenzUtils.skyBlockArea == "Carnival"
 
     val currentTask: String?
-        get() =
-            ScoreboardPattern.carnivalTasksPattern.firstMatches(ScoreboardData.sidebarLinesFormatted)?.removeColor()
+        get() = ScoreboardPattern.carnivalTasksPattern.firstMatches(ScoreboardData.sidebarLinesFormatted)?.removeColor()
 
     private val fruitBounds = LorenzVec(-112, 72, -11).axisAlignedTo(LorenzVec(-106, 72, -5))
 
