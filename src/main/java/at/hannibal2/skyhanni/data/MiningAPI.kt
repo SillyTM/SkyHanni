@@ -11,6 +11,7 @@ import at.hannibal2.skyhanni.events.ScoreboardUpdateEvent
 import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
 import at.hannibal2.skyhanni.events.mining.OreMinedEvent
 import at.hannibal2.skyhanni.events.player.PlayerDeathEvent
+import at.hannibal2.skyhanni.features.event.carnival.CarnivalAPI
 import at.hannibal2.skyhanni.features.gui.customscoreboard.ScoreboardPattern
 import at.hannibal2.skyhanni.features.mining.OreBlock
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
@@ -20,7 +21,7 @@ import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzUtils.inAnyIsland
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
-import at.hannibal2.skyhanni.utils.RegexUtils.matchFirst
+import at.hannibal2.skyhanni.utils.RegexUtils.firstMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matches
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.TimeUtils.format
@@ -41,10 +42,6 @@ object MiningAPI {
         "cold.reset",
         "§6The warmth of the campfire reduced your §r§b❄ Cold §r§6to §r§a0§r§6!|§c ☠ §r§7You froze to death§r§7.",
     )
-    private val coldResetDeath by group.pattern(
-        "cold.deathreset",
-        "§c ☠ §r§7§r§.(?<name>.+)§r§7 (?<reason>.+)",
-    )
 
     private data class MinedBlock(val ore: OreBlock, var confirmed: Boolean, val time: SimpleTimeMark = SimpleTimeMark.now())
 
@@ -63,6 +60,7 @@ object MiningAPI {
     var inCrimsonIsle = false
     var inEnd = false
     var inSpidersDen = false
+    var inCarnival = false
 
     var currentAreaOreBlocks = setOf<OreBlock>()
 
@@ -97,13 +95,14 @@ object MiningAPI {
         IslandType.THE_END,
         IslandType.CRIMSON_ISLE,
         IslandType.SPIDER_DEN,
+        IslandType.HUB, // TODO: change this to use the booleans stored
     )
 
     fun inColdIsland() = inAnyIsland(IslandType.DWARVEN_MINES, IslandType.MINESHAFT)
 
     @SubscribeEvent
     fun onScoreboardChange(event: ScoreboardUpdateEvent) {
-        val newCold = event.scoreboard.matchFirst(ScoreboardPattern.coldPattern) {
+        val newCold = ScoreboardPattern.coldPattern.firstMatcher(event.scoreboard) {
             group("cold").toInt().absoluteValue
         } ?: return
 
@@ -211,19 +210,22 @@ object MiningAPI {
 
         if (surroundingMinedBlocks.isEmpty()) return
 
-        val originalBlock = surroundingMinedBlocks.maxByOrNull { it.value.time.passedSince() }?.takeIf { it.value.confirmed }?.value
-            ?: run {
-                surroundingMinedBlocks.clear()
-                recentClickedBlocks.clear()
-                return
-            }
+        val blocks = surroundingMinedBlocks.filter { it.value.confirmed }.ifEmpty {
+            surroundingMinedBlocks.clear()
+            recentClickedBlocks.clear()
+            return
+        }
 
-        val extraBlocks = surroundingMinedBlocks.values.filter { it.confirmed }.countBy { it.ore }
+        val originalBlock = blocks.maxByOrNull { it.value.time.passedSince() } ?: return
 
-        OreMinedEvent(originalBlock.ore, extraBlocks).post()
+        val extraBlocks = blocks.values.filter { it.confirmed }.countBy { it.ore }
+
+        OreMinedEvent(originalBlock.value.ore, extraBlocks, originalBlock.key).post()
 
         surroundingMinedBlocks.clear()
-        recentClickedBlocks = recentClickedBlocks.filter { it.value.time.passedSince() < originalBlock.time.passedSince() }.toMutableMap()
+        recentClickedBlocks = recentClickedBlocks.filter {
+            it.value.time.passedSince() < originalBlock.value.time.passedSince()
+        }.toMutableMap()
     }
 
     @SubscribeEvent
@@ -288,6 +290,7 @@ object MiningAPI {
         inCrimsonIsle = IslandType.CRIMSON_ISLE.isInIsland()
         inEnd = IslandType.THE_END.isInIsland()
         inSpidersDen = IslandType.SPIDER_DEN.isInIsland()
+        inCarnival = CarnivalAPI.inCarnival()
 
         currentAreaOreBlocks = OreBlock.entries.filter { it.checkArea() }.toSet()
     }
