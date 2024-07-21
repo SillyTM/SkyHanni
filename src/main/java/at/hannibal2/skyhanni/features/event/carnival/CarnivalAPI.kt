@@ -1,15 +1,13 @@
 package at.hannibal2.skyhanni.features.event.carnival
 
-import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.data.ScoreboardData
 import at.hannibal2.skyhanni.events.LorenzChatEvent
 import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
-import at.hannibal2.skyhanni.events.mining.OreMinedEvent
+import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
 import at.hannibal2.skyhanni.features.gui.customscoreboard.ScoreboardPattern
-import at.hannibal2.skyhanni.features.mining.OreBlock
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
-import at.hannibal2.skyhanni.utils.LocationUtils.isInside
+import at.hannibal2.skyhanni.utils.LocationUtils.isInsideInclusive
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
@@ -22,6 +20,7 @@ import at.hannibal2.skyhanni.utils.RenderUtils.drawString
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
+import net.minecraft.init.Blocks
 import net.minecraft.util.AxisAlignedBB
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.seconds
@@ -57,6 +56,7 @@ object CarnivalAPI {
     )
 
     private val fruitBlocks = mutableMapOf<LorenzVec, Int>()
+    private val bombedBlocks = mutableSetOf<LorenzVec>()
 
     private var lastDigTime = SimpleTimeMark.farPast()
     private var lastChatTime = SimpleTimeMark.farPast()
@@ -66,16 +66,23 @@ object CarnivalAPI {
 
     private var timeout = 2.seconds
 
-    @HandleEvent(onlyOnSkyblock = true, onlyOnIsland = IslandType.HUB)
-    fun onOreMined(event: OreMinedEvent) {
-        if (event.originalOre != OreBlock.FRUIT_SAND) return
+    @SubscribeEvent
+    fun onBlockChange(event: ServerBlockChangeEvent) {
+        if (!LorenzUtils.inSkyBlock || !inCarnival()) return
         if (currentTask != "Fruit Digging") return
-        val pos = event.position
-        if (!fruitBounds.isInside(pos)) return
 
-        lastDigTime = SimpleTimeMark.now()
-        lastPos = pos
-        handleFruitBlock()
+        val pos = event.location
+        if (!fruitBounds.isInsideInclusive(pos)) return
+
+        when (event.newState.block) {
+            Blocks.sandstone -> {
+                lastDigTime = SimpleTimeMark.now()
+                lastPos = pos
+                handleFruitBlock()
+            }
+
+            Blocks.sandstone_stairs -> bombedBlocks += pos
+        }
     }
 
     @SubscribeEvent
@@ -95,6 +102,7 @@ object CarnivalAPI {
             lastPos = null
             lastAmount = null
             fruitBlocks.clear()
+            bombedBlocks.clear()
         }
     }
 
@@ -116,7 +124,10 @@ object CarnivalAPI {
 
         fruitBlocks.forEach { (pos, amount) ->
             event.drawColor(pos, LorenzColor.RED)
-            event.drawString(pos.add(0.5, 1.0, 0.5), amount.toString())
+            event.drawString(pos.add(0.5, 2.0, 0.5), "§c$amount")
+        }
+        bombedBlocks.forEach { pos ->
+            event.drawColor(pos, LorenzColor.YELLOW)
         }
     }
 }

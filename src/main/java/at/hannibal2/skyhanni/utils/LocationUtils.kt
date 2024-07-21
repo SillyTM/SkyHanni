@@ -36,6 +36,9 @@ object LocationUtils {
 
     fun AxisAlignedBB.isInside(vec: LorenzVec) = isVecInside(vec.toVec3())
 
+    fun AxisAlignedBB.isInsideInclusive(vec: LorenzVec) =
+        vec.x in minX..maxX && vec.y in minY..maxY && vec.z in minZ..maxZ
+
     fun AxisAlignedBB.isPlayerInside() = isInside(playerLocation())
 
     fun LorenzVec.canBeSeen(radius: Double = 150.0): Boolean {

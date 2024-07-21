@@ -1,7 +1,6 @@
 package at.hannibal2.skyhanni.features.mining
 
 import at.hannibal2.skyhanni.data.MiningAPI.currentAreaOreBlocks
-import at.hannibal2.skyhanni.data.MiningAPI.inCarnival
 import at.hannibal2.skyhanni.data.MiningAPI.inCrimsonIsle
 import at.hannibal2.skyhanni.data.MiningAPI.inCrystalHollows
 import at.hannibal2.skyhanni.data.MiningAPI.inDwarvenMines
@@ -121,12 +120,6 @@ enum class OreBlock(
     OBSIDIAN(
         checkBlock = { it.block == Blocks.obsidian },
         checkArea = { inCrystalHollows || inEnd },
-    ),
-
-    // CARNIVAL
-    FRUIT_SAND(
-        checkBlock = ::isSand,
-        checkArea = { inCarnival },
     ),
 
     // HARD STONE
@@ -253,10 +246,6 @@ private fun isTitanium(state: IBlockState): Boolean {
 
 private fun isStone(state: IBlockState): Boolean {
     return (state.block == Blocks.stone && state.getValue(BlockStone.VARIANT) == BlockStone.EnumType.STONE)
-}
-
-private fun isSand(state: IBlockState): Boolean {
-    return (state.block == Blocks.sand && state.getValue(BlockSand.VARIANT) == BlockSand.EnumType.SAND)
 }
 
 private fun isHardStoneHollows(state: IBlockState): Boolean {
