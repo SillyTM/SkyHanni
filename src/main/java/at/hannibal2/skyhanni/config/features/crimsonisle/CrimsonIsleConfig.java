@@ -3,6 +3,7 @@ package at.hannibal2.skyhanni.config.features.crimsonisle;
 import at.hannibal2.skyhanni.config.FeatureToggle;
 import at.hannibal2.skyhanni.config.core.config.Position;
 import at.hannibal2.skyhanni.config.features.crimsonisle.ashfang.AshfangConfig;
+import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig;
 import com.google.gson.annotations.Expose;
 import io.github.notenoughupdates.moulconfig.annotations.Accordion;
 import io.github.notenoughupdates.moulconfig.annotations.Category;
@@ -15,6 +16,10 @@ public class CrimsonIsleConfig {
     @Category(name = "Ashfang", desc = "Ashfang settings")
     @Expose
     public AshfangConfig ashfang = new AshfangConfig();
+
+    @Category(name = "Dojo", desc = "Dojo settings")
+    @Expose
+    public DojoConfig dojo = new DojoConfig();
 
     @ConfigOption(name = "Reputation Helper", desc = "")
     @Accordion
