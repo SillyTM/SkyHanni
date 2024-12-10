@@ -129,7 +129,7 @@ object DojoAPI {
             return
         }
         challengeScorePattern.matchMatcher(event.message) {
-            this@DojoAPI.resetDojo()
+            resetDojo()
             return
         }
     }

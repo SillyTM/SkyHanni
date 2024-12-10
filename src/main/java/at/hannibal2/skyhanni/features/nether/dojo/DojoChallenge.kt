@@ -15,7 +15,7 @@ enum class DojoChallenge {
     private val formattedName = toFormattedName()
     val displayName: String get() = "§eTest of $formattedName"
 
-    val isActive: Boolean get() = DojoAPI.challenge == this
+    inline val isActive: Boolean get() = DojoAPI.challenge == this
 
     override fun toString(): String = displayName
 
