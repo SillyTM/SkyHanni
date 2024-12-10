@@ -14,6 +14,7 @@ import at.hannibal2.skyhanni.data.jsonobjects.local.VisualWordsJson
 import at.hannibal2.skyhanni.data.repo.RepoManager
 import at.hannibal2.skyhanni.events.LorenzTickEvent
 import at.hannibal2.skyhanni.events.utils.PreInitFinishedEvent
+import at.hannibal2.skyhanni.features.misc.Ping
 import at.hannibal2.skyhanni.features.nether.reputationhelper.CrimsonIsleReputationHelper
 import at.hannibal2.skyhanni.skyhannimodule.LoadedModules
 import at.hannibal2.skyhanni.test.command.ErrorManager
@@ -80,6 +81,8 @@ class SkyHanniMod {
             Exception("Error reading repo data", e).printStackTrace()
         }
         loadedClasses.clear()
+
+        Ping.startPingUpdater()
     }
 
     private val loadedClasses = mutableSetOf<String>()
