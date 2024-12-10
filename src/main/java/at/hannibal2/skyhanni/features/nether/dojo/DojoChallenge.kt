@@ -12,10 +12,14 @@ enum class DojoChallenge {
     TENACITY,
     ;
 
-    private val displayName = toFormattedName()
-    val testName: String get() = "§eTest of $displayName"
+    private val formattedName = toFormattedName()
+    val displayName: String get() = "§eTest of $formattedName"
 
     val isActive: Boolean get() = DojoAPI.challenge == this
 
     override fun toString(): String = displayName
+
+    companion object {
+        fun fromName(name: String): DojoChallenge? = runCatching { valueOf(name.uppercase()) }.getOrNull()
+    }
 }

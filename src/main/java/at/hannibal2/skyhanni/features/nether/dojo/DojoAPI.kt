@@ -9,7 +9,7 @@ import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
-import at.hannibal2.skyhanni.utils.RegexUtils.matchGroup
+import at.hannibal2.skyhanni.utils.RegexUtils.findMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matchMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matches
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
@@ -24,8 +24,7 @@ object DojoAPI {
 
     var ghastCounter = 0
         private set
-    var inChallenge = false
-        private set
+    val inChallenge: Boolean get() = challenge != null
     var challenge: DojoChallenge? = null
         private set
     var inDojo = false
@@ -38,6 +37,14 @@ object DojoAPI {
     private val ghastSpawnPattern by patternGroup.pattern(
         "ghast.spawn",
         "§eThe ghasts? (?:are|is) becoming more frustrated\\.\\.\\."
+    )
+
+    /**
+     * REGEX-TEST: §f                       §r§6Test of Force §r§e§lOBJECTIVES
+     */
+    private val challengeStartPattern by patternGroup.pattern(
+        "challenge.start",
+        "^§f\\s+(?:§.)*Test of (?<test>.+)\\s"
     )
 
     /**
@@ -67,25 +74,26 @@ object DojoAPI {
         }
         event.addIrrelevant {
             add("inChallenge: $inChallenge")
+            add("challenge: ${challenge?.name}")
             add("ghastCounter: $ghastCounter")
         }
     }
 
     @HandleEvent
     fun onAreaChangeEvent(event: ScoreboardAreaChangeEvent) {
-        inDojo = event.area == "Dojo"
-        if (!inDojo) reset()
+        inDojo = event.area == "Dojo" || event.area == "Dojo Arena"
+        if (!inDojo) resetDojo()
     }
 
     @SubscribeEvent
     fun onWorldChange(event: LorenzWorldChangeEvent) {
         inDojo = false
-        reset()
+        resetDojo()
     }
 
-    private fun reset() {
+    private fun resetDojo() {
+        challenge = null
         ghastCounter = 0
-        inChallenge = false
     }
 
     private fun LorenzChatEvent.tryBlock(reason: String) {
@@ -96,24 +104,32 @@ object DojoAPI {
     fun onChat(event: LorenzChatEvent) {
         if (!IslandType.CRIMSON_ISLE.isInIsland()) return
         val message = event.message
-        val taoMessage = taoMessage.matchGroup(message, "message")?.removeColor()
-        if (ghastSpawnPattern.matches(message)) {
-            ghastCounter++
-            event.tryBlock("Dojo")
+        challengeStartPattern.findMatcher(message) {
+            val name = group("test")
+            val newChallenge = DojoChallenge.fromName(name)
+            challenge = newChallenge
             return
         }
-
-        if (taoMessage == "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
-            event.tryBlock("Master Tao")
-            return
+        when (challenge) {
+            DojoChallenge.TENACITY -> {
+                if (ghastSpawnPattern.matches(message)) {
+                    ghastCounter++
+                    event.tryBlock("Dojo")
+                    return
+                }
+            }
+            else -> {}
         }
 
-        if (taoMessage == "Ahhh, here we go! Let's get you into the Arena.") {
-            inChallenge = true
+        taoMessage.matchMatcher(message) {
+            val taoMessage = group("message")?.removeColor()
+            if (taoMessage == "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
+                event.tryBlock("Master Tao")
+            }
             return
         }
         challengeScorePattern.matchMatcher(event.message) {
-            reset()
+            this@DojoAPI.resetDojo()
             return
         }
     }
