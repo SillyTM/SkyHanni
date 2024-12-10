@@ -57,8 +57,8 @@ object Ping {
 
     fun startPingUpdater() {
         val scheduler = Executors.newScheduledThreadPool(1)
+        ChatUtils.debug("Starting Ping Updater")
         scheduler.scheduleAtFixedRate({
-            ChatUtils.debug("ping updater")
             sendPing()
         }, 0, 5, TimeUnit.SECONDS)
     }
