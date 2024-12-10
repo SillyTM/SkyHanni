@@ -141,11 +141,13 @@ object DojoAPI {
             challenge = newChallenge
             return
         }
+
         when (challenge) {
             DojoChallenge.TENACITY -> {
                 if (ghastSpawnPattern.matches(message)) {
                     ghastCounter++
                     event.tryBlock("Dojo")
+                    TenacityFeatures.warnGhastSpawn(ghastCounter)
                     return
                 }
             }
