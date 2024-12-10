@@ -4,16 +4,26 @@ import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.DebugDataCollectEvent
+import at.hannibal2.skyhanni.events.EntityMaxHealthUpdateEvent
 import at.hannibal2.skyhanni.events.LorenzChatEvent
 import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
+import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
+import at.hannibal2.skyhanni.utils.LocationUtils.contains
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
+import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.RegexUtils.findMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matchMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matches
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
+import at.hannibal2.skyhanni.utils.align
+import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
+import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
+import net.minecraft.entity.monster.EntityZombie
+import net.minecraft.item.ItemArmor
+import net.minecraft.item.ItemArmor.ArmorMaterial
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @SkyHanniModule
@@ -29,6 +39,7 @@ object DojoAPI {
         private set
     var inDojo = false
         private set
+    private val forceZombies = mutableMapOf<EntityZombie, ForceZombieType>()
 
     /**
      * REGEX-TEST: §eThe ghast is becoming more frustrated...
@@ -77,6 +88,26 @@ object DojoAPI {
             add("challenge: ${challenge?.name}")
             add("ghastCounter: $ghastCounter")
         }
+    }
+
+    // TODO: get proper location
+    private val dojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
+
+    private fun LorenzVec.inDojoArena(): Boolean = this in dojoArena
+
+    @HandleEvent
+    fun onHealthUpdate(event: EntityMaxHealthUpdateEvent) {
+        if (!DojoChallenge.FORCE.isActive) return
+        val entity = event.entity as? EntityZombie ?: return
+        if (!entity.getLorenzVec().inDojoArena()) return
+        val helmet = entity.getEntityHelmet()?.item?.let { it as? ItemArmor }
+        val type = ForceZombieType.fromMaterial(helmet?.armorMaterial) ?: return
+        forceZombies[entity] = type
+    }
+
+    @HandleEvent
+    fun onEntityLeaveWorld(event: EntityLeaveWorldEvent<EntityZombie>) {
+        forceZombies -= event.entity
     }
 
     @HandleEvent

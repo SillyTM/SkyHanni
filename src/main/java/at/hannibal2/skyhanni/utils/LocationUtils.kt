@@ -38,6 +38,8 @@ object LocationUtils {
         return vec.up(player.getEyeHeight().toDouble())
     }
 
+    operator fun AxisAlignedBB.contains(vec: LorenzVec) = isInside(vec)
+
     fun AxisAlignedBB.isInside(vec: LorenzVec) = isVecInside(vec.toVec3())
 
     fun AxisAlignedBB.isPlayerInside() = isInside(playerLocation())
