@@ -95,7 +95,7 @@ object DojoAPI {
 
     private fun LorenzVec.inDojoArena(): Boolean = this in dojoArena
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
     fun onHealthUpdate(event: EntityMaxHealthUpdateEvent) {
         if (!DojoChallenge.FORCE.isActive) return
         val entity = event.entity as? EntityZombie ?: return
@@ -105,7 +105,7 @@ object DojoAPI {
         forceZombies[entity] = type
     }
 
-    @HandleEvent
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
     fun onEntityLeaveWorld(event: EntityLeaveWorldEvent<EntityZombie>) {
         forceZombies -= event.entity
     }
