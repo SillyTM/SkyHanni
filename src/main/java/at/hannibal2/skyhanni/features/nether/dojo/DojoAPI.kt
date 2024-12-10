@@ -26,6 +26,8 @@ object DojoAPI {
         private set
     var inChallenge = false
         private set
+    var challenge: DojoChallenge? = null
+        private set
     var inDojo = false
         private set
 

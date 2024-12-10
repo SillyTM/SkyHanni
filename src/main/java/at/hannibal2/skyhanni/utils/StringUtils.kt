@@ -473,6 +473,9 @@ object StringUtils {
         }
     }
 
+    fun <T : Enum<T>> Enum<T>.toFormattedName(): String =
+        name.split("_").joinToString(" ") { it.lowercase().replaceFirstChar(Char::uppercase) }
+
     /**
      * Removes starting and ending reset formattings that don't sever a benefit at all.
      */
