@@ -148,7 +148,7 @@ public class GUIConfig {
 
     @Expose
     @ConfigLink(owner = GUIConfig.class, field = "pingDisplay")
-    public Position pingDisplayPosition = new Position(10, 20, false, true);
+    public Position pingDisplayPosition = new Position(10, 22, false, true);
 
     @Expose
     @ConfigOption(name = "Config Button", desc = "Add a button to the pause menu to configure SkyHanni.")
