@@ -81,8 +81,6 @@ class SkyHanniMod {
             Exception("Error reading repo data", e).printStackTrace()
         }
         loadedClasses.clear()
-
-        Ping.startPingUpdater()
     }
 
     private val loadedClasses = mutableSetOf<String>()
