@@ -17,7 +17,7 @@ enum class DojoChallenge {
 
     inline val isActive: Boolean get() = DojoAPI.challenge == this
 
-    override fun toString(): String = displayName
+    override fun toString(): String = formattedName
 
     companion object {
         fun fromName(name: String): DojoChallenge? = runCatching { valueOf(name.uppercase()) }.getOrNull()

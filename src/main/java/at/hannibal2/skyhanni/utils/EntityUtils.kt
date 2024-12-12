@@ -3,6 +3,7 @@ package at.hannibal2.skyhanni.utils
 import at.hannibal2.skyhanni.data.mob.MobFilter.isRealPlayer
 import at.hannibal2.skyhanni.events.SkyHanniRenderEntityEvent
 import at.hannibal2.skyhanni.features.dungeon.DungeonAPI
+import at.hannibal2.skyhanni.mixins.hooks.RenderLivingEntityHelper
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.ItemUtils.getSkullTexture
 import at.hannibal2.skyhanni.utils.LocationUtils.canBeSeen
@@ -33,6 +34,7 @@ import net.minecraft.util.AxisAlignedBB
 import net.minecraftforge.client.event.RenderLivingEvent
 import net.minecraftforge.fml.common.eventhandler.Event
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import java.awt.Color
 
 @SkyHanniModule
 object EntityUtils {
@@ -162,6 +164,10 @@ object EntityUtils {
     fun EntityEnderman.getBlockInHand(): IBlockState? = heldBlockState
 
     inline fun <reified R : Entity> getEntities(): Sequence<R> = getAllEntities().filterIsInstance<R>()
+
+    fun EntityLivingBase.highlight(color: Color, condition: () -> Boolean = { true }) {
+        RenderLivingEntityHelper.setEntityColorWithNoHurtTime(this, color, condition)
+    }
 
     private fun WorldClient.getAllEntities(): Iterable<Entity> =
         //#if MC < 1.14

@@ -1,54 +1,35 @@
 package at.hannibal2.skyhanni.features.nether.dojo
 
+import at.hannibal2.skyhanni.SkyHanniMod
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.DebugDataCollectEvent
-import at.hannibal2.skyhanni.events.EntityMaxHealthUpdateEvent
 import at.hannibal2.skyhanni.events.LorenzChatEvent
 import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
-import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
-import at.hannibal2.skyhanni.utils.LocationUtils.contains
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
+import at.hannibal2.skyhanni.utils.NumberUtil.formatInt
 import at.hannibal2.skyhanni.utils.RegexUtils.findMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matchMatcher
-import at.hannibal2.skyhanni.utils.RegexUtils.matches
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
 import at.hannibal2.skyhanni.utils.align
-import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
-import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
-import net.minecraft.entity.monster.EntityZombie
-import net.minecraft.item.ItemArmor
-import net.minecraft.item.ItemArmor.ArmorMaterial
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @SkyHanniModule
 object DojoAPI {
 
-    private val config = DojoConfig()
-    private val patternGroup = RepoPattern.group("nether.dojo")
+    val config: DojoConfig get() = SkyHanniMod.feature.crimsonIsle.dojo
+    val patternGroup = RepoPattern.group("nether.dojo")
 
-    var ghastCounter = 0
-        private set
     val inChallenge: Boolean get() = challenge != null
     var challenge: DojoChallenge? = null
         private set
     var inDojo = false
         private set
-    private val forceZombies = mutableMapOf<EntityZombie, ForceZombieType>()
-
-    /**
-     * REGEX-TEST: §eThe ghast is becoming more frustrated...
-     * REGEX-TEST: §eThe ghasts are becoming more frustrated...
-     */
-    private val ghastSpawnPattern by patternGroup.pattern(
-        "ghast.spawn",
-        "§eThe ghasts? (?:are|is) becoming more frustrated\\.\\.\\."
-    )
 
     /**
      * REGEX-TEST: §f                       §r§6Test of Force §r§e§lOBJECTIVES
@@ -64,7 +45,7 @@ object DojoAPI {
      */
     private val challengeScorePattern by patternGroup.pattern(
         "challenge.score",
-        "§f *§r§6Your Rank: §r§a(?<rank>\\w) §r§8\\(\\d+\\)(?: §r§c§lFAILED)?"
+        "§f *§r§6Your Rank: §r§a(?<rank>\\w) §r§8\\((?<score>[\\d,.]+)\\)(?: §r§c§lFAILED)?"
     )
 
     /**
@@ -84,31 +65,16 @@ object DojoAPI {
             return
         }
         event.addIrrelevant {
-            add("inChallenge: $inChallenge")
-            add("challenge: ${challenge?.name}")
-            add("ghastCounter: $ghastCounter")
+            add("In Challenge: $inChallenge")
+            add("Current Challenge: ${challenge?.displayName ?: "None"}")
+            DojoChallengeClass.onDebugAll(this)
         }
     }
 
     // TODO: get proper location
     private val dojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
 
-    private fun LorenzVec.inDojoArena(): Boolean = this in dojoArena
-
-    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
-    fun onHealthUpdate(event: EntityMaxHealthUpdateEvent) {
-        if (!DojoChallenge.FORCE.isActive) return
-        val entity = event.entity as? EntityZombie ?: return
-        if (!entity.getLorenzVec().inDojoArena()) return
-        val helmet = entity.getEntityHelmet()?.item?.let { it as? ItemArmor }
-        val type = ForceZombieType.fromMaterial(helmet?.armorMaterial) ?: return
-        forceZombies[entity] = type
-    }
-
-    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
-    fun onEntityLeaveWorld(event: EntityLeaveWorldEvent<EntityZombie>) {
-        forceZombies -= event.entity
-    }
+    fun inDojoArena(location: LorenzVec): Boolean = /*location in dojoArena*/ true
 
     @HandleEvent
     fun onAreaChangeEvent(event: ScoreboardAreaChangeEvent) {
@@ -124,11 +90,11 @@ object DojoAPI {
 
     private fun resetDojo() {
         challenge = null
-        ghastCounter = 0
+        DojoChallengeClass.resetAll()
     }
 
-    private fun LorenzChatEvent.tryBlock(reason: String) {
-        if (config.hideUselessMessages) blockedReason = reason
+    fun tryBlock(event: LorenzChatEvent, reason: String) {
+        if (config.hideUselessMessages) event.blockedReason = reason
     }
 
     @SubscribeEvent
@@ -142,26 +108,15 @@ object DojoAPI {
             return
         }
 
-        when (challenge) {
-            DojoChallenge.TENACITY -> {
-                if (ghastSpawnPattern.matches(message)) {
-                    ghastCounter++
-                    event.tryBlock("Dojo")
-                    TenacityFeatures.warnGhastSpawn(ghastCounter)
-                    return
-                }
-            }
-            else -> {}
-        }
-
         taoMessage.matchMatcher(message) {
             val taoMessage = group("message")?.removeColor()
-            if (taoMessage == "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
-                event.tryBlock("Master Tao")
+            if (taoMessage != "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
+                tryBlock(event, "Master Tao")
             }
             return
         }
-        challengeScorePattern.matchMatcher(event.message) {
+        challengeScorePattern.matchMatcher(message) {
+            val score = group("score").formatInt()
             resetDojo()
             return
         }
