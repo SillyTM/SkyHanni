@@ -35,9 +35,8 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
         if (!isActive()) return
         val entity = event.entity as? EntityZombie ?: return
         if (!DojoAPI.inDojoArena(entity.getLorenzVec())) return
-        val helmet = entity.getEntityHelmet() ?: return
-        val itemArmor = helmet.item as? ItemArmor ?: return
-        val type = ForceZombieType.fromMaterial(itemArmor.armorMaterial) ?: return
+        val material = entity.getHelmetMaterial() ?: return
+        val type = ForceZombieType.fromMaterial(material) ?: return
         entity.highlight(type.color, config::highlightZombies)
         forceZombies[entity] = ZombieData(type)
     }
@@ -61,12 +60,17 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
     override fun onDebug(builder: MutableList<String>) {
         builder.add("Zombies: ${forceZombies.size}")
         forceZombies.forEach { (entity, data) ->
-            builder.add("  - ${entity.name} (${data.type})")
+            builder.add("  - Material: ${entity.getHelmetMaterial()}, Type: ${data.type}")
         }
     }
 
     override fun reset() {
         forceZombies.clear()
+    }
+
+    private fun EntityZombie.getHelmetMaterial(): ItemArmor.ArmorMaterial? {
+        val helmet = getEntityHelmet() ?: return null
+        return (helmet.item as? ItemArmor)?.armorMaterial
     }
 
 
