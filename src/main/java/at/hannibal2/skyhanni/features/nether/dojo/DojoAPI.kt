@@ -112,6 +112,7 @@ object DojoAPI {
     fun onChat(event: LorenzChatEvent) {
         if (!IslandType.CRIMSON_ISLE.isInIsland()) return
         val message = event.message
+
         challengeStartPattern.findMatcher(message) {
             val name = group("test")
             val newChallenge = DojoChallenge.fromName(name)
@@ -119,7 +120,13 @@ object DojoAPI {
             return
         }
 
+        if (message == "§cAbilities are disabled in this area!") {
+            tryBlock(event, "Dojo")
+            return
+        }
+
         taoMessage.matchMatcher(message) {
+            // TODO dont hide dialogue from elle's quest
             val taoMessage = group("message")?.removeColor()
             if (taoMessage != "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
                 tryBlock(event, "Master Tao")
