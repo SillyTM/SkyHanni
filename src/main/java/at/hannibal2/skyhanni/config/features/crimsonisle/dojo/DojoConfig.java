@@ -7,43 +7,43 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 
 public class DojoConfig {
 
-    @ConfigOption(name = "Hide Useless Messages", desc = "Hides usesless dojo messages, like Master Tao's messages.")
     @Expose
+    @ConfigOption(name = "Hide Useless Messages", desc = "Hides useless dojo messages, like Master Tao's messages.")
     @ConfigEditorBoolean
     public boolean hideUselessMessages = true;
 
+    @Expose
     @ConfigOption(name = "Test of Force", desc = "")
     @Accordion
-    @Expose
     public ForceConfig force = new ForceConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Stamina", desc = "")
     @Accordion
-    @Expose
     public StaminaConfig stamina = new StaminaConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Mastery", desc = "")
     @Accordion
-    @Expose
     public MasteryConfig mastery = new MasteryConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Discipline", desc = "")
     @Accordion
-    @Expose
     public DisciplineConfig discipline = new DisciplineConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Swiftness", desc = "")
     @Accordion
-    @Expose
     public SwiftnessConfig swiftness = new SwiftnessConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Control", desc = "")
     @Accordion
-    @Expose
     public ControlConfig control = new ControlConfig();
 
+    @Expose
     @ConfigOption(name = "Test of Tenacity", desc = "")
     @Accordion
-    @Expose
     public TenacityConfig tenacity = new TenacityConfig();
 }

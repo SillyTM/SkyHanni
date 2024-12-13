@@ -5,6 +5,7 @@ import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
+import at.hannibal2.skyhanni.utils.RenderUtils.draw3DLine
 import at.hannibal2.skyhanni.utils.RenderUtils.drawWireframeBoundingBoxNea
 import at.hannibal2.skyhanni.utils.RenderUtils.expandBlock
 import net.minecraft.init.Blocks
@@ -31,13 +32,29 @@ object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
 
     @SubscribeEvent
     fun onRenderWorld(event: LorenzRenderWorldEvent) {
-        if (!isActive() || !config.blockHighlight) return
+        if (!isActive()) return
         val pos = nextBlock ?: return
-        event.drawWireframeBoundingBoxNea(
-            pos.blockBoundingBox().expandBlock(),
-            LorenzColor.GREEN.toColor()
-        )
+        if (config.blockHighlight) {
+            event.drawWireframeBoundingBoxNea(
+                pos.blockBoundingBox().expandBlock(),
+                LorenzColor.GREEN.toColor()
+            )
+        }
+        if (config.drawLine) {
+            val prev = previousBlock ?: return
+            val prevCenter = prev.centerTopFace()
+            val posCenter = pos.centerTopFace()
+            event.draw3DLine(
+                prevCenter,
+                posCenter,
+                LorenzColor.AQUA.toColor(),
+                3,
+                false
+            )
+        }
     }
+
+    private fun LorenzVec.centerTopFace() = blockCenter().up(0.51)
 
     override fun onDebug(builder: MutableList<String>) {
         builder.add("Next block: ${nextBlock?.toCleanString() ?: "None"}")

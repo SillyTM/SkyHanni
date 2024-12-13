@@ -7,8 +7,13 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 public class SwiftnessConfig {
 
     @Expose
-    @ConfigOption(name = "Highlight Block", desc = "highlights the next block you have to stand on")
+    @ConfigOption(name = "Highlight Block", desc = "Highlights the next block you have to stand on.")
     @ConfigEditorBoolean
-    public boolean blockHighlight = false;
+    public boolean blockHighlight = true;
+
+    @Expose
+    @ConfigOption(name = "Draw Line", desc = "Draws a line to the next block from the previous block.")
+    @ConfigEditorBoolean
+    public boolean drawLine = false;
 
 }
