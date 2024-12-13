@@ -9,6 +9,9 @@ import at.hannibal2.skyhanni.events.LorenzChatEvent
 import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
+import at.hannibal2.skyhanni.utils.LocationUtils
+import at.hannibal2.skyhanni.utils.LocationUtils.contains
+import at.hannibal2.skyhanni.utils.LocationUtils.distanceToPlayer
 import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.formatInt
@@ -73,8 +76,16 @@ object DojoAPI {
 
     // TODO: get proper location
     private val dojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
+    private val mainDojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
 
-    fun inDojoArena(location: LorenzVec): Boolean = /*location in dojoArena*/ true
+    fun inDojoArena(location: LorenzVec): Boolean {
+        // workaround for now
+        return location.distanceToPlayer() < 30
+        // TODO: do this properly
+        val player = LocationUtils.playerLocation()
+        if (player in mainDojoArena) return location in mainDojoArena
+        // get bounding box of the current dojo arena so it doesn't actually get triggered by locations in other arenas
+    }
 
     @HandleEvent
     fun onAreaChangeEvent(event: ScoreboardAreaChangeEvent) {

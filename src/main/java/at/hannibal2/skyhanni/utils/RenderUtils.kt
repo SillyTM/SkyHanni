@@ -1281,6 +1281,11 @@ object RenderUtils {
         drawFilledBoundingBoxNea(aabb, c, alphaMultiplier, renderRelativeToCamera, drawVerticalBarriers, partialTicks)
     }
 
+    fun LorenzRenderWorldEvent.drawWireframeBoundingBoxNea(
+        aabb: AxisAlignedBB,
+        color: Color,
+    ) = drawWireframeBoundingBoxNea(aabb, color, partialTicks)
+
     fun drawWireframeBoundingBoxNea(
         aabb: AxisAlignedBB,
         color: Color,

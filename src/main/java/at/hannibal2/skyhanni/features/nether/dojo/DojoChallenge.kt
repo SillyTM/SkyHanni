@@ -13,7 +13,7 @@ enum class DojoChallenge {
     ;
 
     private val formattedName = toFormattedName()
-    val displayName: String get() = "§eTest of $formattedName"
+    val displayName: String get() = "Test of $formattedName"
 
     inline val isActive: Boolean get() = DojoAPI.challenge == this
 
