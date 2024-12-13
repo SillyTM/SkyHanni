@@ -47,8 +47,8 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
         forceZombies.forEach { (entity, data) ->
             val (type, time) = data
             val timeLeft = time.timeUntil()
-            val pos = entity.getLorenzVec()
-            event.drawString(pos.up(2), timeLeft.format(showMilliSeconds = true), color = type.color)
+            val pos = entity.getLorenzVec().up(entity.eyeHeight + 0.5)
+            event.drawString(pos, timeLeft.format(showMilliSeconds = true), color = type.color)
         }
     }
 
