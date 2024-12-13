@@ -69,7 +69,11 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
             for ((entity, startPos) in projectileData) {
                 val motionVec = entity.getMotionLorenzVec()
                 val endPos = BlockUtils.rayTrace(startPos.pos, motionVec) ?: (startPos.pos + motionVec)
-                draw3DLine(startPos.pos, endPos, Color.GREEN, 5, true)
+
+                if (config.projectileLine) {
+                    draw3DLine(startPos.pos, endPos, Color.GREEN, 5, true)
+
+                }
             }
         }
     }
