@@ -15,6 +15,7 @@ import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
 import at.hannibal2.skyhanni.utils.getMotionLorenzVec
 import at.hannibal2.skyhanni.utils.toLorenzVec
+import net.minecraft.entity.Entity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -32,29 +33,31 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
     private var ghastCount: Int = 0
 
     @HandleEvent
-    fun onEntityEnterWorld(event: EntityEnterWorldEvent<EntityGhast>) {
-        ghastCount++
-        warnGhastSpawn(ghastCount)
-    }
+    fun onEntityEnterWorld(event: EntityEnterWorldEvent<Entity>) {
+        when (val entity = event.entity) {
+            is EntityGhast -> {
+                ghastCount++
+                warnGhastSpawn(ghastCount)
+            }
+            is EntityArmorStand -> {
+                val (_, stack) = entity.inventory.withIndex().firstOrNull { it.value != null } ?: return
+                if (stack.name != "Block of Coal") return
 
-    fun warnGhastSpawn(count: Int) {
-        if (!config.ghastWarning) return
-
-        SoundUtils.createSound("random.orb", 0.5f).playSound()
-        LorenzUtils.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
-    }
-
-    @HandleEvent
-    fun onEntityEnterWorld(event: EntityEnterWorldEvent<EntityArmorStand>) {
-        val (_, stack) = event.entity.inventory.withIndex().firstOrNull { it.value != null } ?: return
-        if (stack.name != "Block of Coal") return
-
-        projectileData += mapOf(event.entity to start_pos(event.entity.position.toLorenzVec()))
+                projectileData += mapOf(entity to start_pos(entity.position.toLorenzVec()))
+            }
+        }
     }
 
     @HandleEvent
     fun onEntityLeaveWorld(event: EntityLeaveWorldEvent<EntityArmorStand>) {
         projectileData -= event.entity
+    }
+
+    private fun warnGhastSpawn(count: Int) {
+        if (!config.ghastWarning) return
+
+        SoundUtils.createSound("random.orb", 0.5f).playSound()
+        LorenzUtils.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
     }
 
     @SubscribeEvent
