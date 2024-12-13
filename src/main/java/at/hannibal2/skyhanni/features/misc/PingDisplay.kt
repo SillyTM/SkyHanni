@@ -87,6 +87,7 @@ object PingDisplay {
     @SubscribeEvent
     fun onSecondPassed(event: SecondPassedEvent) {
         if (!isEnabled()) return
+        if (!event.repeatSeconds(5)) return
         sendPing(false)
     }
 
