@@ -8,8 +8,7 @@ import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
-import at.hannibal2.skyhanni.utils.ChatUtils
-import at.hannibal2.skyhanni.utils.EntityUtils.getArmorInventory
+import at.hannibal2.skyhanni.utils.DelayedRun
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
@@ -58,8 +57,12 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 warnGhastSpawn(ghastCount)
             }
             is EntityArmorStand -> {
-                val pos = entity.getLorenzVec()
-                projectileData[entity] = ProjectileData(pos.copy(y = pos.y + 1.5))
+                DelayedRun.runNextTick {
+                    val stack = entity.getStandHelmet() ?: return@runNextTick
+                    if (stack.item != Blocks.coal_block) return@runNextTick
+                    val pos = entity.getLorenzVec().up(1.5)
+                    projectileData[entity] = ProjectileData(pos)
+                }
             }
         }
     }
