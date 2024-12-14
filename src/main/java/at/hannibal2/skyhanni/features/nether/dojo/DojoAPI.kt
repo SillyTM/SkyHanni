@@ -63,7 +63,7 @@ object DojoAPI {
         "§e\\[NPC] §eMaster Tao§f: (?<message>.*)",
     )
 
-    @SubscribeEvent
+    @HandleEvent
     fun onDebug(event: DebugDataCollectEvent) {
         event.title("DojoAPI")
         if (!inDojo) {

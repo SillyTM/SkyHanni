@@ -1,5 +1,7 @@
 package at.hannibal2.skyhanni.features.nether.dojo
 
+import at.hannibal2.skyhanni.api.event.HandleEvent
+import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
 import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
@@ -19,7 +21,7 @@ object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
     private var nextBlock: LorenzVec? = null
     private var previousBlock: LorenzVec? = null
 
-    @SubscribeEvent
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
     fun onBlockChange(event: ServerBlockChangeEvent) {
         if (!isActive()) return
         val pos = event.location
