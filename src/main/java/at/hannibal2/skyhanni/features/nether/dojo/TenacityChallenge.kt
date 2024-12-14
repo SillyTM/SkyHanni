@@ -20,6 +20,7 @@ import at.hannibal2.skyhanni.utils.compat.getStandHelmet
 import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.getMotionLorenzVec
 import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
 import net.minecraft.init.Blocks
@@ -47,7 +48,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
     private var ghastCount: Int = 0
 
     @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
-    fun onEntityEnterWorld(event: EntityEnterWorldEvent<Entity>) {
+    fun onEntityEnterWorld(event: EntityEnterWorldEvent<EntityLivingBase>) {
         if (!isActive()) return
         val entity = event.entity
         if (!DojoAPI.inDojoArena(entity.getLorenzVec())) return
