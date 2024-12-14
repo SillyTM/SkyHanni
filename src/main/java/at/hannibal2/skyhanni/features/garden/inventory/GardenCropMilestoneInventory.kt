@@ -44,7 +44,7 @@ object GardenCropMilestoneInventory {
         average = -1.0
     }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onRenderItemTip(event: RenderInventoryItemTipEvent) {
         if (average == -1.0) return
 
@@ -82,7 +82,7 @@ object GardenCropMilestoneInventory {
         event.toolTip.add(index, "§7Progress to Tier $maxTier: §e$percentageFormat")
     }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onConfigFix(event: ConfigUpdaterMigrator.ConfigFixEvent) {
         event.move(3, "garden.numberAverageCropMilestone", "garden.number.averageCropMilestone")
         event.move(3, "garden.cropMilestoneTotalProgress", "garden.tooltipTweak.cropMilestoneTotalProgress")

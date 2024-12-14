@@ -36,7 +36,6 @@ import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.TimeUnit
 import at.hannibal2.skyhanni.utils.TimeUtils.format
 import at.hannibal2.skyhanni.utils.renderables.Renderable
-import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -60,7 +59,7 @@ object GardenCropMilestoneDisplay {
     private var lastMushWarnedLevel = -1
     private var previousMushNext = 0
 
-    @SubscribeEvent
+    @HandleEvent
     fun onConfigLoad(event: ConfigLoadEvent) {
         ConditionalUtils.onToggle(
             config.bestShowMaxedNeeded,
@@ -91,7 +90,7 @@ object GardenCropMilestoneDisplay {
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOW)
+    @HandleEvent(priority = HandleEvent.LOW)
     fun onProfileJoin(event: ProfileJoinEvent) {
         GardenCropMilestones.cropCounter?.let {
             if (it.values.sum() == 0L) {
@@ -107,7 +106,7 @@ object GardenCropMilestoneDisplay {
         update()
     }
 
-    @SubscribeEvent
+    @HandleEvent
     fun onOwnInventoryItemUpdate(event: OwnInventoryItemUpdateEvent) {
         if (!GardenAPI.inGarden()) return
 
@@ -339,7 +338,7 @@ object GardenCropMilestoneDisplay {
 
     private fun isEnabled() = GardenAPI.inGarden() && config.progress
 
-    @SubscribeEvent
+    @HandleEvent
     fun onConfigFix(event: ConfigUpdaterMigrator.ConfigFixEvent) {
         event.move(3, "garden.cropMilestoneProgress", "garden.cropMilestones.progress")
         event.move(3, "garden.cropMilestoneWarnClose", "garden.cropMilestones.warnClose")
