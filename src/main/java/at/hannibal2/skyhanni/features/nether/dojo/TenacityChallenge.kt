@@ -8,6 +8,9 @@ import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
+import at.hannibal2.skyhanni.utils.ChatUtils
+import at.hannibal2.skyhanni.utils.EntityUtils.getArmorInventory
+import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.ordinal
@@ -22,7 +25,6 @@ import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
 import net.minecraft.init.Blocks
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import java.awt.Color
 import kotlin.time.Duration.Companion.seconds
 
 @SkyHanniModule
@@ -56,10 +58,8 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 warnGhastSpawn(ghastCount)
             }
             is EntityArmorStand -> {
-                val stack = entity.getStandHelmet() ?: return
-                if (stack.item != Blocks.coal_block) return
-
-                projectileData[entity] = ProjectileData(entity.getLorenzVec())
+                val pos = entity.getLorenzVec()
+                projectileData[entity] = ProjectileData(pos.copy(y = pos.y + 1.5))
             }
         }
     }
@@ -94,7 +94,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 val startPos = data.startPos
                 val endPos = data.endPos ?: return@draw3D
                 if (drawLine) {
-                    draw3DLine(startPos, endPos, Color.GREEN, 5, true)
+                    draw3DLine(startPos, endPos, LorenzColor.DARK_RED.toColor(), 5, true)
                 }
             }
         }
