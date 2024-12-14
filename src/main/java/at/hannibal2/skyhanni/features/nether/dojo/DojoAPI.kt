@@ -19,7 +19,10 @@ import at.hannibal2.skyhanni.utils.RegexUtils.findMatcher
 import at.hannibal2.skyhanni.utils.RegexUtils.matchMatcher
 import at.hannibal2.skyhanni.utils.StringUtils.removeColor
 import at.hannibal2.skyhanni.utils.align
+import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
+import net.minecraft.entity.EntityLiving
+import net.minecraft.item.ItemArmor
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @SkyHanniModule
@@ -39,7 +42,7 @@ object DojoAPI {
      */
     private val challengeStartPattern by patternGroup.pattern(
         "challenge.start",
-        "^§f\\s+(?:§.)*Test of (?<test>.+)\\s"
+        "^§f\\s+(?:§.)*Test of (?<test>.+)\\s",
     )
 
     /**
@@ -48,7 +51,7 @@ object DojoAPI {
      */
     private val challengeScorePattern by patternGroup.pattern(
         "challenge.score",
-        "§f *§r§6Your Rank: §r§a(?<rank>\\w) §r§8\\((?<score>[\\d,.]+)\\)(?: §r§c§lFAILED)?"
+        "§f *§r§6Your Rank: §r§a(?<rank>\\w) §r§8\\((?<score>[\\d,.]+)\\)(?: §r§c§lFAILED)?",
     )
 
     /**
@@ -57,7 +60,7 @@ object DojoAPI {
      */
     private val taoMessage by patternGroup.pattern(
         "tao",
-        "§e\\[NPC] §eMaster Tao§f: (?<message>.*)"
+        "§e\\[NPC] §eMaster Tao§f: (?<message>.*)",
     )
 
     @SubscribeEvent
@@ -108,6 +111,11 @@ object DojoAPI {
         if (config.hideUselessMessages) event.blockedReason = reason
     }
 
+    fun EntityLiving.getHelmetMaterial(): ItemArmor.ArmorMaterial? {
+        val helmet = getEntityHelmet() ?: return null
+        return (helmet.item as? ItemArmor)?.armorMaterial
+    }
+
     @SubscribeEvent
     fun onChat(event: LorenzChatEvent) {
         if (!IslandType.CRIMSON_ISLE.isInIsland()) return
@@ -127,8 +135,9 @@ object DojoAPI {
 
         taoMessage.matchMatcher(message) {
             // TODO dont hide dialogue from elle's quest
-            val taoMessage = group("message")?.removeColor()
-            if (taoMessage != "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
+            val taoMessage = group("message").removeColor()
+            if (taoMessage !=
+                "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
                 tryBlock(event, "Master Tao")
             }
             return

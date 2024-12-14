@@ -8,6 +8,7 @@ import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.EntityUtils.highlight
 import at.hannibal2.skyhanni.utils.RenderUtils.drawString
+import at.hannibal2.skyhanni.utils.RenderUtils.exactLocation
 import at.hannibal2.skyhanni.utils.SimpleTimeMark
 import at.hannibal2.skyhanni.utils.TimeUtils.format
 import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
@@ -47,7 +48,7 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
         forceZombies.forEach { (entity, data) ->
             val (type, time) = data
             val timeLeft = time.timeUntil()
-            val pos = entity.getLorenzVec().up(entity.eyeHeight + 0.5)
+            val pos = event.exactLocation(entity).up(entity.eyeHeight + 1)
             event.drawString(pos, timeLeft.format(showMilliSeconds = true), color = type.color)
         }
     }

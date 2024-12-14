@@ -2,33 +2,31 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
 import at.hannibal2.skyhanni.utils.LorenzColor
-import net.minecraft.item.ItemArmor
-
-private typealias Material = ItemArmor.ArmorMaterial
+import net.minecraft.item.ItemArmor.ArmorMaterial
 
 enum class ForceZombieType(
     val points: Int,
-    val material: Material,
+    private val material: ArmorMaterial,
     color: LorenzColor
 ) {
     IRON(
         10,
-        Material.IRON,
+        ArmorMaterial.IRON,
         LorenzColor.GRAY,
     ),
     GOLDEN(
         20,
-        Material.GOLD,
+        ArmorMaterial.GOLD,
         LorenzColor.GOLD,
     ),
     DIAMOND(
         30,
-        Material.DIAMOND,
+        ArmorMaterial.DIAMOND,
         LorenzColor.AQUA,
     ),
     NEGATIVE(
         -30,
-        Material.LEATHER,
+        ArmorMaterial.LEATHER,
         LorenzColor.RED,
     ),
     ;
@@ -36,6 +34,6 @@ enum class ForceZombieType(
     val color = color.toColor().addAlpha(200)
 
     companion object {
-        fun fromMaterial(material: Material): ForceZombieType? = entries.find { it.material == material }
+        fun fromMaterial(material: ArmorMaterial): ForceZombieType? = entries.find { it.material == material }
     }
 }
