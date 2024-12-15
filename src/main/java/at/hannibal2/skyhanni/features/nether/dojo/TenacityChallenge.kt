@@ -9,7 +9,6 @@ import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
-import at.hannibal2.skyhanni.utils.EntityUtils.cleanName
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
@@ -96,6 +95,11 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
             for (data in projectileData.values) {
                 val startPos = data.startPos
                 var endPos = data.endPos ?: return@draw3D
+                //endPos = endPos.copy(x = endPos.x + 0.5,y = endPos.y - 1 ,z = endPos.z + 0.5)
+
+                if (config.projectileLine) {
+                    draw3DLine(startPos, endPos.up(0.5), LorenzColor.DARK_RED.toColor(), 5, true)
+                }
 
                 if (config.blockHighlight) {
                     drawFilledBoundingBoxNea(

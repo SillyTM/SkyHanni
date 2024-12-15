@@ -13,6 +13,11 @@ public class TenacityConfig {
     public boolean ghastWarning = false;
 
     @Expose
+    @ConfigOption(name = "Projectile Path", desc = "Draw a line to show the path of the projectiles.")
+    @ConfigEditorBoolean
+    public boolean projectileLine = true;
+
+    @Expose
     @ConfigOption(name = "Block Highlight", desc = "Highlight the block where the ghast fireball will hit.")
     @ConfigEditorBoolean
     public boolean blockHighlight = true;
