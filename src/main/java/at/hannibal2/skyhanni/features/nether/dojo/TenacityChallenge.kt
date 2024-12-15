@@ -9,11 +9,13 @@ import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
+import at.hannibal2.skyhanni.utils.EntityUtils.cleanName
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.ordinal
 import at.hannibal2.skyhanni.utils.RenderUtils
+import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBoxNea
 import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
 import at.hannibal2.skyhanni.utils.compat.getStandHelmet
@@ -90,14 +92,21 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
         if (!isActive()) return
         if (projectileData.isEmpty()) return
 
-        val drawLine = config.projectileLine
-
         RenderUtils.LineDrawer.draw3D(event.partialTicks) {
             for (data in projectileData.values) {
                 val startPos = data.startPos
-                val endPos = data.endPos ?: return@draw3D
-                if (drawLine) {
-                    draw3DLine(startPos, endPos, LorenzColor.DARK_RED.toColor(), 5, true)
+                var endPos = data.endPos ?: return@draw3D
+
+                if (config.blockHighlight) {
+                    drawFilledBoundingBoxNea(
+                        endPos.blockBoundingBox().expand(0.99, 0.015, 0.99),
+                        LorenzColor.RED.addOpacity(config.opacity)
+                    )
+
+                    drawFilledBoundingBoxNea(
+                        endPos.blockBoundingBox().expand(2.5, 0.01, 2.5),
+                        LorenzColor.GOLD.addOpacity(config.opacity)
+                    )
                 }
             }
         }
