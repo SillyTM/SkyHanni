@@ -1,8 +1,4 @@
-import at.skyhanni.sharedvariables.MinecraftVersion
-import at.skyhanni.sharedvariables.MultiVersionStage
-import at.skyhanni.sharedvariables.ProjectTarget
-import at.skyhanni.sharedvariables.SHVersionInfo
-import at.skyhanni.sharedvariables.versionString
+import at.skyhanni.sharedvariables.*
 import io.gitlab.arturbosch.detekt.Detekt
 import io.gitlab.arturbosch.detekt.DetektCreateBaselineTask
 import moe.nea.shot.ShotParser
@@ -47,6 +43,12 @@ java {
     // causing crashes during tests. You can still manually select DCEVM in the Minecraft Client
     // IntelliJ run configuration.
     toolchain.vendor.set(JvmVendorSpec.ADOPTIUM)
+}
+// We need gradle > 2.2.4 (dependency provided) for the toolchains to work.
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "com.google.code.gson" && requested.name == "gson") useVersion("2.11.0")
+    }
 }
 val runDirectory = rootProject.file("run")
 runDirectory.mkdirs()
@@ -169,14 +171,14 @@ dependencies {
             isTransitive = false
         }
         annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
-        annotationProcessor("com.google.code.gson:gson:2.10.1")
+        annotationProcessor("com.google.code.gson:gson:2.11.0")
         annotationProcessor("com.google.guava:guava:17.0")
     } else if (target == ProjectTarget.BRIDGE116FABRIC) {
         modCompileOnly("net.fabricmc:fabric-loader:0.16.7")
         modCompileOnly("net.fabricmc.fabric-api:fabric-api:0.42.0+1.16")
     } else if (target == ProjectTarget.MODERN) {
-        modCompileOnly("net.fabricmc:fabric-loader:0.16.7")
-        modCompileOnly("net.fabricmc.fabric-api:fabric-api:0.102.0+1.21")
+        modCompileOnly("net.fabricmc:fabric-loader:0.16.10")
+        modCompileOnly("net.fabricmc.fabric-api:fabric-api:0.115.0+1.21.4")
     }
 
     implementation(kotlin("stdlib-jdk8"))
@@ -191,13 +193,14 @@ dependencies {
         exclude(module = "unspecified")
         isTransitive = false
     }
-    // October 3, 2024, 11:43 PM AEST
-    // https://github.com/NotEnoughUpdates/NotEnoughUpdates/tree/2.4.0
-    devenvMod("com.github.NotEnoughUpdates:NotEnoughUpdates:2.4.0:all") {
+    // December 29, 2024, 07:30 PM EST
+    // https://github.com/NotEnoughUpdates/NotEnoughUpdates/tree/2.5.0
+    devenvMod("com.github.NotEnoughUpdates:NotEnoughUpdates:2.5.0:all") {
         exclude(module = "unspecified")
         isTransitive = false
     }
 
+    shadowModImpl(libs.gson)
     shadowModImpl(libs.moulconfig)
     shadowImpl(libs.libautoupdate) {
         exclude(module = "gson")
@@ -212,7 +215,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.0")
     testImplementation("io.mockk:mockk:1.12.5")
 
-    implementation("net.hypixel:mod-api:0.3.1")
+    if (target.minecraftVersion == MinecraftVersion.MC189) {
+        compileOnly(libs.hypixelmodapi)
+        shadowImpl(libs.hypixelmodapitweaker)
+    }
+
 
     // getting clock offset
     shadowImpl("commons-net:commons-net:3.11.1")
@@ -312,7 +319,7 @@ tasks.withType(JavaCompile::class) {
 
 tasks.withType(org.gradle.jvm.tasks.Jar::class) {
     archiveBaseName.set("SkyHanni")
-    archiveAppendix.set("mc${target.minecraftVersion.versionName}")
+    archiveVersion.set("$version-mc${target.minecraftVersion.versionName}")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE // Why do we have this here? This only *hides* errors.
     manifest.attributes.run {
         this["Main-Class"] = "SkyHanniInstallerFrame"
@@ -343,10 +350,12 @@ tasks.shadowJar {
     }
     exclude("META-INF/versions/**")
     mergeServiceFiles()
+    relocate("com.google.gson", "at.hannibal2.skyhanni.deps.gson")
     relocate("io.github.notenoughupdates.moulconfig", "at.hannibal2.skyhanni.deps.moulconfig")
     relocate("moe.nea.libautoupdate", "at.hannibal2.skyhanni.deps.libautoupdate")
     relocate("com.jagrosh.discordipc", "at.hannibal2.skyhanni.deps.discordipc")
     relocate("org.apache.commons.net", "at.hannibal2.skyhanni.deps.commons.net")
+    relocate("net.hypixel.modapi.tweaker", "at.hannibal2.skyhanni.deps.hypixel.modapi.tweaker")
 }
 tasks.jar {
     archiveClassifier.set("nodeps")

@@ -1,9 +1,9 @@
 package at.hannibal2.skyhanni.utils
 
-import at.hannibal2.skyhanni.api.GetFromSackAPI
+import at.hannibal2.skyhanni.api.GetFromSackApi
 import at.hannibal2.skyhanni.utils.ChatUtils.debug
 import at.hannibal2.skyhanni.utils.ChatUtils.sendMessageToServer
-import at.hannibal2.skyhanni.utils.NEUInternalName.Companion.toInternalName
+import at.hannibal2.skyhanni.utils.NeuInternalName.Companion.toInternalName
 
 object HypixelCommands {
     fun skyblock() {
@@ -63,7 +63,7 @@ object HypixelCommands {
     }
 
     fun getFromSacks(itemName: String, amount: Int) {
-        GetFromSackAPI.getFromSack(itemName.toInternalName(), amount)
+        GetFromSackApi.getFromSack(itemName.toInternalName(), amount)
     }
 
     fun widget() {
@@ -102,6 +102,14 @@ object HypixelCommands {
         send("wiki $text")
     }
 
+    fun backPack(position: Int) {
+        send("bp $position")
+    }
+
+    fun enderChest(position: Int) {
+        send("ec $position")
+    }
+
     fun partyWarp() {
         send("party warp")
     }
@@ -132,6 +140,10 @@ object HypixelCommands {
 
     fun partyChat(message: String) {
         send("pc $message")
+    }
+
+    fun partyInvite(player: String) {
+        send("party $player")
     }
 
     fun allChat(message: String) {
