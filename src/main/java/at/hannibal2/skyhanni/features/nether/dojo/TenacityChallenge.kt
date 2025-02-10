@@ -2,10 +2,10 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
-import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
-import at.hannibal2.skyhanni.events.LorenzTickEvent
 import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
@@ -24,7 +24,6 @@ import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
 import net.minecraft.init.Blocks
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.seconds
 
 @SkyHanniModule
@@ -80,14 +79,14 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
         LorenzUtils.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
     }
 
-    @SubscribeEvent
-    fun onTick(event: LorenzTickEvent) {
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onTick(event: SkyHanniTickEvent) {
         if (!isActive()) return
         projectileData.forEach { (entity, data) -> data.update(entity) }
     }
 
-    @SubscribeEvent
-    fun onWorldRender(event: LorenzRenderWorldEvent) {
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onWorldRender(event: SkyHanniRenderWorldEvent) {
         if (!isActive()) return
         if (projectileData.isEmpty()) return
 

@@ -5,14 +5,13 @@ import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.DebugDataCollectEvent
-import at.hannibal2.skyhanni.events.LorenzChatEvent
-import at.hannibal2.skyhanni.events.LorenzWorldChangeEvent
+import at.hannibal2.skyhanni.events.chat.SkyHanniChatEvent
+import at.hannibal2.skyhanni.events.minecraft.WorldChangeEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LocationUtils
 import at.hannibal2.skyhanni.utils.LocationUtils.contains
 import at.hannibal2.skyhanni.utils.LocationUtils.distanceToPlayer
-import at.hannibal2.skyhanni.utils.LorenzUtils.isInIsland
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.formatInt
 import at.hannibal2.skyhanni.utils.RegexUtils.findMatcher
@@ -23,7 +22,6 @@ import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
 import net.minecraft.entity.EntityLiving
 import net.minecraft.item.ItemArmor
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @SkyHanniModule
 object DojoAPI {
@@ -96,8 +94,8 @@ object DojoAPI {
         if (!inDojo) resetDojo()
     }
 
-    @SubscribeEvent
-    fun onWorldChange(event: LorenzWorldChangeEvent) {
+    @HandleEvent
+    fun onWorldChange(event: WorldChangeEvent) {
         inDojo = false
         resetDojo()
     }
@@ -107,7 +105,7 @@ object DojoAPI {
         DojoChallengeClass.resetAll()
     }
 
-    fun tryBlock(event: LorenzChatEvent, reason: String) {
+    fun tryBlock(event: SkyHanniChatEvent, reason: String) {
         if (config.hideUselessMessages) event.blockedReason = reason
     }
 
@@ -116,9 +114,8 @@ object DojoAPI {
         return (helmet.item as? ItemArmor)?.armorMaterial
     }
 
-    @SubscribeEvent
-    fun onChat(event: LorenzChatEvent) {
-        if (!IslandType.CRIMSON_ISLE.isInIsland()) return
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onChat(event: SkyHanniChatEvent) {
         val message = event.message
 
         challengeStartPattern.findMatcher(message) {

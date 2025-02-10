@@ -3,6 +3,7 @@ package at.hannibal2.skyhanni.config.features.crimsonisle
 import at.hannibal2.skyhanni.config.FeatureToggle
 import at.hannibal2.skyhanni.config.core.config.Position
 import at.hannibal2.skyhanni.config.features.crimsonisle.ashfang.AshfangConfig
+import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig
 import com.google.gson.annotations.Expose
 import io.github.notenoughupdates.moulconfig.annotations.Accordion
 import io.github.notenoughupdates.moulconfig.annotations.Category
@@ -10,10 +11,16 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigLink
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 
+
 class CrimsonIsleConfig {
     @Category(name = "Ashfang", desc = "Ashfang settings")
     @Expose
     var ashfang: AshfangConfig = AshfangConfig()
+
+
+    @Category(name = "Dojo", desc = "Dojo settings")
+    @Expose
+    var dojo: DojoConfig = DojoConfig()
 
     @ConfigOption(name = "Reputation Helper", desc = "")
     @Accordion
@@ -38,7 +45,7 @@ class CrimsonIsleConfig {
     @Expose
     @ConfigOption(
         name = "Pablo NPC Helper",
-        desc = "Show a clickable message that grabs the flower needed from your sacks."
+        desc = "Show a clickable message that grabs the flower needed from your sacks.",
     )
     @ConfigEditorBoolean
     @FeatureToggle
@@ -57,7 +64,7 @@ class CrimsonIsleConfig {
     @ConfigOption(
         name = "Dojo Rank Display",
         desc = "Display your rank, score, actual belt, and points needed for the next belt " +
-            "in the Challenges inventory on the Crimson Isles."
+            "in the Challenges inventory on the Crimson Isles.",
     )
     @ConfigEditorBoolean
     @FeatureToggle

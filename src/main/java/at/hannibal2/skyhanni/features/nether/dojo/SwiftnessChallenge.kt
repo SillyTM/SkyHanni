@@ -2,8 +2,8 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
-import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
 import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
@@ -11,7 +11,6 @@ import at.hannibal2.skyhanni.utils.RenderUtils.draw3DLine
 import at.hannibal2.skyhanni.utils.RenderUtils.drawWireframeBoundingBoxNea
 import at.hannibal2.skyhanni.utils.RenderUtils.expandBlock
 import net.minecraft.init.Blocks
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 @SkyHanniModule
 object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
@@ -32,8 +31,8 @@ object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
         }
     }
 
-    @SubscribeEvent
-    fun onRenderWorld(event: LorenzRenderWorldEvent) {
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isActive()) return
         val pos = nextBlock ?: return
         if (config.blockHighlight) {

@@ -2,9 +2,9 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
-import at.hannibal2.skyhanni.events.LorenzRenderWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityMaxHealthUpdateEvent
+import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.EntityUtils.highlight
 import at.hannibal2.skyhanni.utils.RenderUtils.drawString
@@ -15,7 +15,6 @@ import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
 import at.hannibal2.skyhanni.utils.getLorenzVec
 import net.minecraft.entity.monster.EntityZombie
 import net.minecraft.item.ItemArmor
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.time.Duration.Companion.seconds
 
 @SkyHanniModule
@@ -42,8 +41,8 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
         forceZombies[entity] = ZombieData(type)
     }
 
-    @SubscribeEvent
-    fun onRenderWorld(event: LorenzRenderWorldEvent) {
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isActive() || !config.despawnTimer) return
         forceZombies.forEach { (entity, data) ->
             val (type, time) = data
