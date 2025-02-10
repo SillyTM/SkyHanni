@@ -5,6 +5,7 @@ import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.config.features.crimsonisle.dojo.DojoConfig
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.DebugDataCollectEvent
+import at.hannibal2.skyhanni.events.SecondPassedEvent
 import at.hannibal2.skyhanni.events.chat.SkyHanniChatEvent
 import at.hannibal2.skyhanni.events.minecraft.WorldChangeEvent
 import at.hannibal2.skyhanni.events.skyblock.ScoreboardAreaChangeEvent
@@ -22,6 +23,7 @@ import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
 import at.hannibal2.skyhanni.utils.repopatterns.RepoPattern
 import net.minecraft.entity.EntityLiving
 import net.minecraft.item.ItemArmor
+import net.minecraft.util.AxisAlignedBB
 
 @SkyHanniModule
 object DojoAPI {
@@ -75,17 +77,45 @@ object DojoAPI {
         }
     }
 
-    // TODO: get proper location
-    private val dojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
-    private val mainDojoArena = LorenzVec(0, 0, 0) align LorenzVec(0, 0, 0)
+    private val dojoArenas: List<AxisAlignedBB>
+    private var currentArena: AxisAlignedBB? = null
+
+    init {
+        val bottomArenaCenter = LorenzVec(-375, 13, -647)
+        val mainArenaCenter = LorenzVec(-207, 100, -598)
+
+        val arenaOffset = 47
+        val arenaRadius = 22
+
+        val centers = mutableListOf<LorenzVec>()
+
+        for (x in -2..2) {
+            for (z in -1..1) {
+                val offset = LorenzVec(x, 0, z) * arenaOffset
+                val center = bottomArenaCenter + offset
+                centers.add(center)
+            }
+        }
+        centers.add(mainArenaCenter)
+
+        dojoArenas = centers.map { center ->
+            val corner1 = center - LorenzVec(arenaRadius, 5, arenaRadius)
+            val corner2 = center + LorenzVec(arenaRadius, 20, arenaRadius)
+            corner1 align corner2
+        }
+    }
+
+
+    @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
+    fun onSecondPassed(event: SecondPassedEvent) {
+        if (!inChallenge || currentArena != null) return
+        val player = LocationUtils.playerLocation()
+        currentArena = dojoArenas.firstOrNull { player in it }
+    }
 
     fun inDojoArena(location: LorenzVec): Boolean {
-        // workaround for now
-        return location.distanceToPlayer() < 30
-        // TODO: do this properly
-        val player = LocationUtils.playerLocation()
-        if (player in mainDojoArena) return location in mainDojoArena
-        // get bounding box of the current dojo arena so it doesn't actually get triggered by locations in other arenas
+        val arena = currentArena ?: return false
+        return location in arena
     }
 
     @HandleEvent
@@ -102,10 +132,11 @@ object DojoAPI {
 
     private fun resetDojo() {
         challenge = null
+        currentArena = null
         DojoChallengeClass.resetAll()
     }
 
-    fun tryBlock(event: SkyHanniChatEvent, reason: String) {
+    private fun tryBlock(event: SkyHanniChatEvent, reason: String) {
         if (config.hideUselessMessages) event.blockedReason = reason
     }
 

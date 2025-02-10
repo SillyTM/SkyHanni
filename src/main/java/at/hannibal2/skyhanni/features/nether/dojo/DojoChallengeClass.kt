@@ -2,6 +2,8 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 abstract class DojoChallengeClass(val challenge: DojoChallenge) {
 
+    protected inline val dojoConfig get() = DojoAPI.config
+
     protected val patternGroup = DojoAPI.patternGroup.group(challenge.name.lowercase())
 
     protected fun isActive(): Boolean = challenge.isActive

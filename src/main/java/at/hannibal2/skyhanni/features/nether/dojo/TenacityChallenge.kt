@@ -29,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 @SkyHanniModule
 object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
 
-    private val config get() = DojoAPI.config.tenacity
+    private val config get() = dojoConfig.tenacity
 
     private data class ProjectileData(
         val startPos: LorenzVec,

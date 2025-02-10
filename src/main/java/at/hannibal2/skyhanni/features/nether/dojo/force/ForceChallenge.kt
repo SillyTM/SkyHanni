@@ -1,10 +1,13 @@
-package at.hannibal2.skyhanni.features.nether.dojo
+package at.hannibal2.skyhanni.features.nether.dojo.force
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityMaxHealthUpdateEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
+import at.hannibal2.skyhanni.features.nether.dojo.DojoAPI
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallenge
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallengeClass
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.EntityUtils.highlight
 import at.hannibal2.skyhanni.utils.RenderUtils.drawString
@@ -25,7 +28,7 @@ object ForceChallenge : DojoChallengeClass(DojoChallenge.FORCE) {
         val time: SimpleTimeMark = SimpleTimeMark.now() + DESPAWN_TIME,
     )
 
-    private val config get() = DojoAPI.config.force
+    private val config get() = dojoConfig.force
     private val DESPAWN_TIME = 10.seconds
 
     private val forceZombies = mutableMapOf<EntityZombie, ZombieData>()

@@ -1,11 +1,14 @@
-package at.hannibal2.skyhanni.features.nether.dojo
+package at.hannibal2.skyhanni.features.nether.dojo.discipline
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.ItemInHandChangeEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityMaxHealthUpdateEvent
+import at.hannibal2.skyhanni.features.nether.dojo.DojoAPI
 import at.hannibal2.skyhanni.features.nether.dojo.DojoAPI.getHelmetMaterial
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallenge
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallengeClass
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.EntityUtils.highlight
 import at.hannibal2.skyhanni.utils.ItemUtils.name
@@ -17,7 +20,7 @@ import net.minecraft.entity.monster.EntityZombie
 @SkyHanniModule
 object DisciplineChallenge : DojoChallengeClass(DojoChallenge.DISCIPLINE) {
 
-    private val config get() = DojoAPI.config.discipline
+    private val config get() = dojoConfig.discipline
 
     private val zombies = mutableMapOf<EntityZombie, DisciplineZombieType>()
     private var heldType: DisciplineZombieType? = null

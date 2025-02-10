@@ -1,4 +1,4 @@
-package at.hannibal2.skyhanni.features.nether.dojo
+package at.hannibal2.skyhanni.features.nether.dojo.force
 
 import at.hannibal2.skyhanni.utils.ColorUtils.addAlpha
 import at.hannibal2.skyhanni.utils.LorenzColor

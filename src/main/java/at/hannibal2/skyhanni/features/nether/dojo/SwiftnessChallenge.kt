@@ -15,7 +15,7 @@ import net.minecraft.init.Blocks
 @SkyHanniModule
 object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
 
-    private val config get() = DojoAPI.config.swiftness
+    private val config get() = dojoConfig.swiftness
 
     private var nextBlock: LorenzVec? = null
     private var previousBlock: LorenzVec? = null
