@@ -196,13 +196,14 @@ object DojoAPI {
 
         taoMessage.matchMatcher(message) {
             val taoMessage = group("message").removeColor()
-            if ((taoMessage !=
-                "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") &&
+
+            if ((taoMessage != "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") &&
                 !taoDialogElleQuest.contains(taoMessage)) {
                 tryBlock(event, "Master Tao")
             }
             return
         }
+
         challengeScorePattern.matchMatcher(message) {
             val score = group("score").formatInt()
             resetDojo()
