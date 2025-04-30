@@ -11,13 +11,13 @@ import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
 import at.hannibal2.skyhanni.utils.LorenzColor
-import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.ordinal
 import at.hannibal2.skyhanni.utils.RenderUtils
 import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBox
 import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
+import at.hannibal2.skyhanni.utils.compat.getHandItem
 import at.hannibal2.skyhanni.utils.compat.getStandHelmet
 import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.getMotionLorenzVec
@@ -59,8 +59,8 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
             }
             is EntityArmorStand -> {
                 DelayedRun.runNextTick {
-                    val stack = entity.getStandHelmet() ?: return@runNextTick
-                    if (stack.item != Blocks.coal_block) return@runNextTick
+                    val stack = entity.getHandItem() ?: return@runNextTick
+                    if (stack.displayName != "Block of Coal") return@runNextTick
                     val pos = entity.getLorenzVec().up(1.5)
                     projectileData[entity] = ProjectileData(pos)
                 }
@@ -87,7 +87,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
     }
 
     @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
-    fun onWorldRender(event: SkyHanniRenderWorldEvent) {
+    fun onRenderWorld(event: SkyHanniRenderWorldEvent) {
         if (!isActive()) return
         if (projectileData.isEmpty()) return
 
