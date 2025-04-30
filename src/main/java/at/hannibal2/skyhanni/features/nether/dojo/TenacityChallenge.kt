@@ -104,12 +104,14 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 if (config.blockHighlight) {
                     event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(0.99, 0.015, 0.99),
-                        LorenzColor.RED.addOpacity(config.opacity)
+                        LorenzColor.RED.toColor(),
+                        (config.opacity / 100f)
                     )
 
                     event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(2.5, 0.01, 2.5),
-                        LorenzColor.GOLD.addOpacity(config.opacity)
+                        LorenzColor.GOLD.toColor(),
+                        (config.opacity / 100f)
                     )
                 }
             }
