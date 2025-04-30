@@ -11,7 +11,6 @@ import at.hannibal2.skyhanni.features.nether.dojo.DojoChallenge
 import at.hannibal2.skyhanni.features.nether.dojo.DojoChallengeClass
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.EntityUtils.highlight
-import at.hannibal2.skyhanni.utils.ItemUtils.name
 import at.hannibal2.skyhanni.utils.NeuItems.getItemStackOrNull
 import at.hannibal2.skyhanni.utils.compat.getEntityHelmet
 import at.hannibal2.skyhanni.utils.getLorenzVec
@@ -19,7 +18,6 @@ import net.minecraft.entity.monster.EntityZombie
 
 @SkyHanniModule
 object DisciplineChallenge : DojoChallengeClass(DojoChallenge.DISCIPLINE) {
-
     private val config get() = dojoConfig.discipline
 
     private val zombies = mutableMapOf<EntityZombie, DisciplineZombieType>()
@@ -59,7 +57,7 @@ object DisciplineChallenge : DojoChallengeClass(DojoChallenge.DISCIPLINE) {
         builder.add("Held type: ${heldType?.name ?: "None"}")
         builder.add("Zombies:")
         zombies.forEach { (entity, type) ->
-            builder.add("  - ${entity.getEntityHelmet()?.name ?: "No Material"} (${type.name})")
+            builder.add("  - ${entity.getEntityHelmet()?.displayName ?: "No Material"} (${type.name})")
         }
     }
 

@@ -8,7 +8,7 @@ import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.RenderUtils.draw3DLine
-import at.hannibal2.skyhanni.utils.RenderUtils.drawWireframeBoundingBoxNea
+import at.hannibal2.skyhanni.utils.RenderUtils.drawWireframeBoundingBox
 import at.hannibal2.skyhanni.utils.RenderUtils.expandBlock
 import net.minecraft.init.Blocks
 
@@ -36,7 +36,7 @@ object SwiftnessChallenge : DojoChallengeClass(DojoChallenge.SWIFTNESS) {
         if (!isActive()) return
         val pos = nextBlock ?: return
         if (config.blockHighlight) {
-            event.drawWireframeBoundingBoxNea(
+            event.drawWireframeBoundingBox(
                 pos.blockBoundingBox().expandBlock(),
                 LorenzColor.GREEN.toColor()
             )

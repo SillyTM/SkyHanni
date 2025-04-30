@@ -2,6 +2,7 @@ package at.hannibal2.skyhanni.features.nether.dojo
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
+import at.hannibal2.skyhanni.data.TitleManager
 import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
@@ -14,7 +15,7 @@ import at.hannibal2.skyhanni.utils.LorenzUtils
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.ordinal
 import at.hannibal2.skyhanni.utils.RenderUtils
-import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBoxNea
+import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBox
 import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
 import at.hannibal2.skyhanni.utils.compat.getStandHelmet
@@ -76,7 +77,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
         if (!config.ghastWarning) return
 
         warningSound.playSound()
-        LorenzUtils.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
+        TitleManager.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
     }
 
     @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
@@ -101,12 +102,12 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 }
 
                 if (config.blockHighlight) {
-                    drawFilledBoundingBoxNea(
+                    event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(0.99, 0.015, 0.99),
                         LorenzColor.RED.addOpacity(config.opacity)
                     )
 
-                    drawFilledBoundingBoxNea(
+                    event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(2.5, 0.01, 2.5),
                         LorenzColor.GOLD.addOpacity(config.opacity)
                     )
