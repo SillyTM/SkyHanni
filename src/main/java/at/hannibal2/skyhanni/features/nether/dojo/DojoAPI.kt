@@ -62,6 +62,15 @@ object DojoAPI {
         "§e\\[NPC] §eMaster Tao§f: (?<message>.*)",
     )
 
+    /**
+     * REGEX-TEST: §eThe ghast is becoming more frustrated...
+     * REGEX-TEST: §eThe ghasts are becoming more frustrated...
+     */
+    private val ghastSpawnMessage by patternGroup.pattern(
+        "tenacity.ghast",
+        "§eThe ghasts? (?:is|are) becoming more frustrated...",
+    )
+
     @HandleEvent
     fun onDebug(event: DebugDataCollectEvent) {
         event.title("DojoAPI")
@@ -156,6 +165,11 @@ object DojoAPI {
         }
 
         if (message == "§cAbilities are disabled in this area!") {
+            tryBlock(event, "Dojo")
+            return
+        }
+
+        ghastSpawnMessage.matchMatcher(event.message) {
             tryBlock(event, "Dojo")
             return
         }
