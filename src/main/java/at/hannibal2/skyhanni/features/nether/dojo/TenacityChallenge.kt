@@ -18,13 +18,11 @@ import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBox
 import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
 import at.hannibal2.skyhanni.utils.compat.getHandItem
-import at.hannibal2.skyhanni.utils.compat.getStandHelmet
 import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.getMotionLorenzVec
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
-import net.minecraft.init.Blocks
 import kotlin.time.Duration.Companion.seconds
 
 @SkyHanniModule
