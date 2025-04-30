@@ -12,7 +12,7 @@ import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
-import at.hannibal2.skyhanni.utils.NumberUtil.ordinal
+import at.hannibal2.skyhanni.utils.NumberUtil.addSuffix
 import at.hannibal2.skyhanni.utils.RenderUtils
 import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBox
 import at.hannibal2.skyhanni.utils.SoundUtils
@@ -77,7 +77,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
         if (!config.ghastWarning) return
 
         warningSound.playSound()
-        TitleManager.sendTitle("§c$count${count.ordinal()} Ghast is Spawning", duration = 3.seconds)
+        TitleManager.sendTitle("§c${count.addSuffix()} Ghast is Spawning", duration = 3.seconds)
     }
 
     @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
