@@ -71,6 +71,26 @@ object DojoAPI {
         "§eThe ghasts? (?:is|are) becoming more frustrated...",
     )
 
+    // todo: only include the important dialogue maybe
+    private val taoDialogElleQuest = listOf(
+        "Ugo is that you?",
+        "You missed yesterday's lesson.",
+        "And the one before that.",
+        "So today you'll have to do three lessons.",
+        "The first one is a Test of Force.",
+        "Go in the Arena.",
+        "Ahhh, here we go! Let's get you into the Arena.",
+        "Onto the next Test, Stamina this time.",
+        "One more test before I let you go. The Test of Mastery.",
+        "Well done Ugo, you finished your training for today.",
+        "Remember Ugo, I can show you the path but I cannot walk it for you.",
+        "If you want to make your father proud you will have to train more than it is expected of you.",
+        "Respect your training and you will respect yourself.",
+        "Go now.",
+        "Ugo! You know very well you need to store all your items away before you enter the Arena.",
+        "Make sure you empty your inventory entirely before you enter."
+    )
+
     @HandleEvent
     fun onDebug(event: DebugDataCollectEvent) {
         event.title("DojoAPI")
@@ -175,10 +195,10 @@ object DojoAPI {
         }
 
         taoMessage.matchMatcher(message) {
-            // TODO dont hide dialogue from elle's quest
             val taoMessage = group("message").removeColor()
-            if (taoMessage !=
-                "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") {
+            if ((taoMessage !=
+                "I only test people who use their bare skills. No extra help allowed! Come back to me once you've stored your items away.") &&
+                !taoDialogElleQuest.contains(taoMessage)) {
                 tryBlock(event, "Master Tao")
             }
             return
