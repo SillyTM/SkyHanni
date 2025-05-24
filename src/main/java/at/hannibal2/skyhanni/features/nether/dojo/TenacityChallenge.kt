@@ -6,20 +6,19 @@ import at.hannibal2.skyhanni.data.TitleManager
 import at.hannibal2.skyhanni.events.entity.EntityEnterWorldEvent
 import at.hannibal2.skyhanni.events.entity.EntityLeaveWorldEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
-import at.hannibal2.skyhanni.events.minecraft.SkyHanniTickEvent
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.BlockUtils
 import at.hannibal2.skyhanni.utils.DelayedRun
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
 import at.hannibal2.skyhanni.utils.NumberUtil.addSuffix
-import at.hannibal2.skyhanni.utils.RenderUtils
 import at.hannibal2.skyhanni.utils.RenderUtils.drawFilledBoundingBox
 import at.hannibal2.skyhanni.utils.SoundUtils
 import at.hannibal2.skyhanni.utils.SoundUtils.playSound
 import at.hannibal2.skyhanni.utils.compat.getHandItem
 import at.hannibal2.skyhanni.utils.getLorenzVec
 import at.hannibal2.skyhanni.utils.getMotionLorenzVec
+import at.hannibal2.skyhanni.utils.render.LineDrawer
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntityGhast
@@ -39,6 +38,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
             endPos = BlockUtils.rayTrace(startPos, motionVec) ?: (startPos + motionVec)
         }
     }
+
     private val projectileData = mutableMapOf<EntityArmorStand, ProjectileData>()
 
     private val warningSound = SoundUtils.createSound("random.orb", 0.5f)
@@ -55,6 +55,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                 ghastCount++
                 warnGhastSpawn(ghastCount)
             }
+
             is EntityArmorStand -> {
                 DelayedRun.runNextTick {
                     val stack = entity.getHandItem() ?: return@runNextTick
@@ -79,7 +80,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
     }
 
     @HandleEvent(onlyOnIsland = IslandType.CRIMSON_ISLE)
-    fun onTick(event: SkyHanniTickEvent) {
+    fun onTick() {
         if (!isActive()) return
         projectileData.forEach { (entity, data) -> data.update(entity) }
     }
@@ -89,7 +90,7 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
         if (!isActive()) return
         if (projectileData.isEmpty()) return
 
-        RenderUtils.LineDrawer.draw3D(event.partialTicks) {
+        LineDrawer.draw3D(event.partialTicks) {
             for (data in projectileData.values) {
                 val startPos = data.startPos
                 var endPos = data.endPos ?: return@draw3D
@@ -103,13 +104,13 @@ object TenacityChallenge : DojoChallengeClass(DojoChallenge.TENACITY) {
                     event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(0.99, 0.015, 0.99),
                         LorenzColor.RED.toColor(),
-                        (config.opacity / 100f)
+                        (config.opacity / 100f),
                     )
 
                     event.drawFilledBoundingBox(
                         endPos.blockBoundingBox().expand(2.5, 0.01, 2.5),
                         LorenzColor.GOLD.toColor(),
-                        (config.opacity / 100f)
+                        (config.opacity / 100f),
                     )
                 }
             }

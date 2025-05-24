@@ -10,7 +10,7 @@ abstract class DojoChallengeClass(val challenge: DojoChallenge) {
 
     protected abstract fun reset()
 
-    protected open fun onDebug(builder: MutableList<String>) {}
+    protected open fun onDebug(builder: MutableList<String>) { /* Empty */ }
 
     init {
         @Suppress("LeakingThis")
