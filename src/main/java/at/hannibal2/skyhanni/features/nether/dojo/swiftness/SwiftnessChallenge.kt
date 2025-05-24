@@ -1,9 +1,12 @@
-package at.hannibal2.skyhanni.features.nether.dojo
+package at.hannibal2.skyhanni.features.nether.dojo.swiftness
 
 import at.hannibal2.skyhanni.api.event.HandleEvent
 import at.hannibal2.skyhanni.data.IslandType
 import at.hannibal2.skyhanni.events.ServerBlockChangeEvent
 import at.hannibal2.skyhanni.events.minecraft.SkyHanniRenderWorldEvent
+import at.hannibal2.skyhanni.features.nether.dojo.DojoAPI
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallenge
+import at.hannibal2.skyhanni.features.nether.dojo.DojoChallengeClass
 import at.hannibal2.skyhanni.skyhannimodule.SkyHanniModule
 import at.hannibal2.skyhanni.utils.LorenzColor
 import at.hannibal2.skyhanni.utils.LorenzVec
